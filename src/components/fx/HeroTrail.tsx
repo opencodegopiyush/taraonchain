@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { TUNE } from "@/lib/edition";
 
 /* ── HeroTrail — the bubble trail, on the landing page ───────
    ambient gold bubbles drifting upward, each with a comet
@@ -33,7 +34,12 @@ export default function HeroTrail({ className }: { className?: string }) {
     let h = 0;
     let dpr = 1;
 
-    const N = 15;
+    const N = TUNE.heroBubbles;
+    const TRAIL_LEN = TUNE.heroTrailLen;
+    const TRAIL_A = TUNE.heroTrailAlpha;
+    const CONST_D = TUNE.heroConstellation;
+    const PUSH_R = TUNE.heroPushRadius;
+    const PUSH_F = TUNE.heroPushForce;
     const bubbles: Bubble[] = [];
 
     const spawn = (b: Bubble, anywhere: boolean) => {
@@ -95,8 +101,8 @@ export default function HeroTrail({ className }: { className?: string }) {
             const dx = b.x - pointer.x;
             const dy = b.y - pointer.y;
             const d = Math.hypot(dx, dy);
-            if (d < 130 && d > 0.5) {
-              const f = ((130 - d) / 130) * 0.55;
+            if (d < PUSH_R && d > 0.5) {
+              const f = ((PUSH_R - d) / PUSH_R) * PUSH_F;
               b.x += (dx / d) * f;
               b.y += (dy / d) * f;
             }
@@ -111,8 +117,8 @@ export default function HeroTrail({ className }: { className?: string }) {
           const a = bubbles[i];
           const c = bubbles[j];
           const d = Math.hypot(a.x - c.x, a.y - c.y);
-          if (d < 120) {
-            ctx.strokeStyle = `rgba(227, 185, 92, ${(1 - d / 120) * 0.13})`;
+          if (d < CONST_D) {
+            ctx.strokeStyle = `rgba(227, 185, 92, ${(1 - d / CONST_D) * 0.13})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -127,7 +133,7 @@ export default function HeroTrail({ className }: { className?: string }) {
         lastSample = now;
         for (const b of bubbles) {
           b.trail.push({ x: b.x, y: b.y });
-          if (b.trail.length > 11) b.trail.shift();
+          if (b.trail.length > TRAIL_LEN) b.trail.shift();
         }
       }
 
@@ -139,8 +145,8 @@ export default function HeroTrail({ className }: { className?: string }) {
           ctx.lineCap = "round";
           for (let i = 1; i < tr.length; i++) {
             const k = i / tr.length;
-            ctx.strokeStyle = `rgba(227, 185, 92, ${0.3 * k * k})`;
-            ctx.lineWidth = Math.max(0.4, b.r * 0.62 * k);
+            ctx.strokeStyle = `rgba(227, 185, 92, ${TRAIL_A * k * k})`;
+            ctx.lineWidth = Math.max(0.5, b.r * 0.68 * k);
             ctx.beginPath();
             ctx.moveTo(tr[i - 1].x, tr[i - 1].y);
             ctx.lineTo(tr[i].x, tr[i].y);

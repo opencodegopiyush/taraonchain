@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useStore } from "@/lib/store";
+import { TUNE } from "@/lib/edition";
 import { NODE_COLORS, SCENE_BG } from "@/lib/palette";
 import type { CaseFile } from "@/lib/types";
 import {
@@ -31,7 +32,7 @@ interface Ripple {
 }
 
 const TRAIL_EVERY = 46; // ms between trail samples
-const TRAIL_LEN = 13;
+const TRAIL_LEN = TUNE.deskTrailLen; // edition-tuned comet length
 
 export default function TraceCanvas() {
   const ref = useRef<HTMLCanvasElement | null>(null);
@@ -254,8 +255,8 @@ export default function TraceCanvas() {
       ctx.lineCap = "round";
       for (let i = 1; i < pts.length; i++) {
         const k = i / pts.length; // 0 old → 1 new
-        const a = 0.34 * k * k;
-        const w = Math.max(0.4, headR * 0.62 * k);
+        const a = TUNE.deskTrailAlpha * k * k;
+        const w = Math.max(0.5, headR * TUNE.deskTrailWidth * k);
         ctx.strokeStyle = rgba(rgb, a);
         ctx.lineWidth = w;
         ctx.beginPath();

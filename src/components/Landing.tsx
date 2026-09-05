@@ -1,17 +1,23 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { useStore, reviewedPct } from "@/lib/store";
+import { EDITION, TUNE } from "@/lib/edition";
 import HeroTrail from "./fx/HeroTrail";
 import Scramble from "./fx/Scramble";
+import GoldWord from "./fx/GoldWord";
 import { useInView, useCountUp, RedactBlock, RedactWord } from "./fx/Reveal";
 
-/* ── v6 landing — "REDACTED" ─────────────────────────────────
-   every animation here is css/canvas — identical on phone and
-   desktop, nothing gated behind pointer:hover or min-width. */
+/* ── v7 landing — two editions, one page ─────────────────────
+   every animation is css/canvas and renders identically on
+   phone and desktop; the tuning (particle counts, trail
+   brightness, hover flourishes) comes from TUNE[edition].
+   headline no longer trusts background-clip:text — the gold
+   word is solid paint + a decorative sheen sweep. */
 
 function Stat({ v, label, suffix }: { v: number; label: string; suffix?: string }) {
   const [ref, on] = useInView<HTMLDivElement>(0.5);
-  const n = useCountUp(v, on);
+  const n = useCountUp(v, on, 900);
   return (
     <div ref={ref} className="flex flex-col gap-1 px-2 py-4 text-center">
       <span className="disp text-2xl font-bold text-gold-hi sm:text-3xl">
@@ -20,6 +26,74 @@ function Stat({ v, label, suffix }: { v: number; label: string; suffix?: string 
       </span>
       <span className="label">{label}</span>
     </div>
+  );
+}
+
+/* HOW IT WORKS — three steps, tap/hover lights them up.
+   pure buttons: works with a finger, no :hover dependency. */
+const STEPS = [
+  {
+    n: "01",
+    t: "OPEN THE CASE",
+    d: "Pull file S-0830. The whole archive ships inside the bundle — no server, no account, nothing leaves your device.",
+  },
+  {
+    n: "02",
+    t: "FOLLOW THE GOLD",
+    d: "Drag the field. Every gold bubble is an entity, every comet trail the direction the money moved. Tap one to interrogate it.",
+  },
+  {
+    n: "03",
+    t: "READ THE STAMPS",
+    d: "Every claim is graded — observed, assessed or unknown. Gold is the evidence stamp; trust it accordingly.",
+  },
+];
+
+function HowItWorks() {
+  const [lit, setLit] = useState<number | null>(null);
+  return (
+    <section className="hairline-t relative px-5 py-14 sm:px-8 sm:py-20">
+      <div className="mx-auto w-full max-w-3xl">
+        <p className="label mb-6">
+          <Scramble text="HOW IT WORKS — THREE MOVES" duration={650} />
+        </p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {STEPS.map((s, i) => (
+            <button
+              key={s.n}
+              type="button"
+              onPointerEnter={() => setLit(i)}
+              onPointerLeave={() => setLit(null)}
+              onPointerDown={() => setLit(i)}
+              className={`panel t4-spring relative overflow-hidden p-4 text-left active:scale-[0.985] sm:p-5 ${
+                lit === i ? "border-[rgba(227,185,92,0.5)]" : ""
+              }`}
+              style={
+                lit === i
+                  ? { boxShadow: "0 0 26px rgba(227,185,92,0.14), inset 0 0 22px rgba(227,185,92,0.05)" }
+                  : undefined
+              }
+            >
+              <span
+                className={`disp text-3xl font-bold t4-spring ${
+                  lit === i ? "text-gold-hi" : "text-[rgba(227,185,92,0.28)]"
+                }`}
+              >
+                {s.n}
+              </span>
+              <p className="label mt-3 mb-2" style={{ color: lit === i ? "var(--gold)" : undefined }}>
+                {s.t}
+              </p>
+              <p className="text-[12.5px] leading-relaxed text-mute">{s.d}</p>
+              <span
+                className={`absolute bottom-0 left-0 h-[2px] bg-[linear-gradient(90deg,var(--gold),transparent)] t4-spring`}
+                style={{ width: lit === i ? "100%" : "18%" }}
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -33,6 +107,36 @@ export default function Landing() {
   const [heroRef, heroOn] = useInView<HTMLDivElement>(0.15);
   const [cardRef, cardOn] = useInView<HTMLDivElement>(0.25);
 
+  /* web edition: the case card tilts toward your cursor.
+     transform-only (compositor-friendly), reset on leave. */
+  const tiltRef = useRef<HTMLDivElement | null>(null);
+  const onCardMove = TUNE.hoverFx
+    ? (e: React.PointerEvent) => {
+        const el = tiltRef.current;
+        if (!el || e.pointerType !== "mouse") return;
+        const r = el.getBoundingClientRect();
+        const dx = (e.clientX - r.left) / r.width - 0.5;
+        const dy = (e.clientY - r.top) / r.height - 0.5;
+        el.style.transform = `perspective(900px) rotateX(${(-dy * 2.4).toFixed(2)}deg) rotateY(${(dx * 2.8).toFixed(2)}deg)`;
+      }
+    : undefined;
+  const onCardLeave = TUNE.hoverFx
+    ? () => {
+        const el = tiltRef.current;
+        if (el) el.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
+      }
+    : undefined;
+
+  const fire = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rip = document.createElement("span");
+    rip.className = "ripple-ink";
+    rip.style.left = `${e.nativeEvent.offsetX}px`;
+    rip.style.top = `${e.nativeEvent.offsetY}px`;
+    (e.currentTarget as HTMLElement).appendChild(rip);
+    setTimeout(() => rip.remove(), 720);
+    openCase();
+  };
+
   return (
     <div className="relative min-h-[100svh] overflow-x-clip bg-background">
       {/* corner chrome */}
@@ -40,7 +144,7 @@ export default function Landing() {
         <span className="mono text-[10px] font-bold tracking-[0.3em] text-bone">
           TARAONCHAIN
         </span>
-        <span className="chip">TEST BUILD · V6 · REDACTED</span>
+        <span className="chip">{TUNE.chip}</span>
       </div>
 
       {/* ── hero ── */}
@@ -52,25 +156,27 @@ export default function Landing() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(8,7,4,0.72)_100%)]" />
 
         <div className="relative z-10 mx-auto w-full max-w-3xl">
-          <p className="label mb-5 fade-up" style={{ animationDelay: "80ms" }}>
-            <Scramble text="ON-CHAIN FORENSICS · CASE ARCHIVE" duration={900} />
+          <p className="label mb-5 fade-up" style={{ animationDelay: "60ms" }}>
+            <Scramble text="ON-CHAIN FORENSICS · CASE ARCHIVE" duration={650} />
           </p>
 
           <h1 className="disp font-bold leading-[0.98] tracking-tight text-ink">
             <span className="block text-[12vw] sm:text-6xl md:text-7xl">
-              <RedactWord active={heroOn} delay={250}>EVERY</RedactWord>{" "}
-              <RedactWord active={heroOn} delay={420}>CHAIN</RedactWord>
+              <RedactWord active={heroOn} delay={200}>EVERY</RedactWord>{" "}
+              <RedactWord active={heroOn} delay={340}>CHAIN</RedactWord>
             </span>
             <span className="block text-[12vw] sm:text-6xl md:text-7xl">
-              <RedactWord active={heroOn} delay={620}>LEAVES</RedactWord>{" "}
-              <RedactWord active={heroOn} delay={790}>A</RedactWord>
+              <RedactWord active={heroOn} delay={480}>LEAVES</RedactWord>{" "}
+              <RedactWord active={heroOn} delay={600}>A</RedactWord>
             </span>
-            <span className="gold-text block text-[15vw] sm:text-7xl md:text-8xl">
-              <RedactWord active={heroOn} delay={1020}>TRAIL.</RedactWord>
+            <span className="block text-[15vw] sm:text-7xl md:text-8xl">
+              <RedactWord active={heroOn} delay={760}>
+                <GoldWord>TRAIL.</GoldWord>
+              </RedactWord>
             </span>
           </h1>
 
-          <RedactBlock active={heroOn} delay={1250} className="mt-7 max-w-xl">
+          <RedactBlock active={heroOn} delay={880} className="mt-7 max-w-xl">
             <p className="read text-[15px] sm:text-base">
               The mempool forgets nothing. TARAONCHAIN turns verified
               investigation reports into case files you can walk through —
@@ -81,20 +187,9 @@ export default function Landing() {
 
           <div
             className="mt-9 flex flex-wrap items-center gap-3 fade-up"
-            style={{ animationDelay: "1500ms" }}
+            style={{ animationDelay: "1050ms" }}
           >
-            <button
-              className="btn btn-gold"
-              onClick={(e) => {
-                const rip = document.createElement("span");
-                rip.className = "ripple-ink";
-                rip.style.left = `${e.nativeEvent.offsetX}px`;
-                rip.style.top = `${e.nativeEvent.offsetY}px`;
-                (e.currentTarget as HTMLElement).appendChild(rip);
-                setTimeout(() => rip.remove(), 720);
-                openCase();
-              }}
-            >
+            <button className="btn btn-gold" onClick={fire}>
               OPEN CASE {cf.id} ▸
             </button>
             <button className="btn btn-ghost" onClick={() => setOverlay("method")}>
@@ -104,7 +199,7 @@ export default function Landing() {
 
           <p
             className="label mt-10 fade-up caret"
-            style={{ animationDelay: "1900ms" }}
+            style={{ animationDelay: "1320ms" }}
           >
             DRAG THE BUBBLES — THEY ANSWER
           </p>
@@ -126,15 +221,21 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── how it works ── */}
+      <HowItWorks />
+
       {/* ── case card ── */}
       <section className="relative px-5 py-14 sm:px-8 sm:py-20">
         <div ref={cardRef} className="mx-auto w-full max-w-3xl">
           <p className="label mb-4">
-            <Scramble text="LATEST DECLASSIFICATION" duration={700} />
+            <Scramble text="LATEST DECLASSIFICATION" duration={650} />
           </p>
 
           <div
-            className={`panel gold-glow relative overflow-hidden p-5 fade-up sm:p-8 ${
+            ref={tiltRef}
+            onPointerMove={onCardMove}
+            onPointerLeave={onCardLeave}
+            className={`panel glow-pulse t4-spring relative overflow-hidden p-5 fade-up sm:p-8 ${
               cardOn ? "" : "opacity-0"
             }`}
           >
@@ -158,7 +259,7 @@ export default function Landing() {
               </span>
             </div>
 
-            <RedactBlock active={cardOn} delay={300} className="mt-5">
+            <RedactBlock active={cardOn} delay={220} className="mt-5">
               <p className="read">{cf.summary}</p>
             </RedactBlock>
 
@@ -176,18 +277,7 @@ export default function Landing() {
               </div>
             </div>
 
-            <button
-              className="btn btn-gold mt-7 w-full sm:w-auto"
-              onClick={(e) => {
-                const rip = document.createElement("span");
-                rip.className = "ripple-ink";
-                rip.style.left = `${e.nativeEvent.offsetX}px`;
-                rip.style.top = `${e.nativeEvent.offsetY}px`;
-                (e.currentTarget as HTMLElement).appendChild(rip);
-                setTimeout(() => rip.remove(), 720);
-                openCase();
-              }}
-            >
+            <button className="btn btn-gold mt-7 w-full sm:w-auto" onClick={fire}>
               OPEN CASE FILE ▸
             </button>
           </div>
@@ -201,7 +291,7 @@ export default function Landing() {
             ▣ ZERO TELEMETRY &nbsp;·&nbsp; ▣ LOCAL ARCHIVE &nbsp;·&nbsp; ▣
             NOTHING LEAVES THIS DEVICE
           </p>
-          <RedactBlock active={cardOn} delay={200} className="mt-5">
+          <RedactBlock active={cardOn} delay={160} className="mt-5">
             <p className="mx-auto max-w-xl text-[12.5px] leading-relaxed text-mute">
               This build reads its case data from the bundle in front of you.
               No account, no database round-trip, no analytics beacon — the
@@ -209,7 +299,7 @@ export default function Landing() {
             </p>
           </RedactBlock>
           <p className="label mt-10">
-            TARAONCHAIN TEST BUILD · V6 · REDACTED · {new Date().getFullYear()}
+            TARAONCHAIN TEST BUILD · V7 · {EDITION === "web" ? "WEB" : "MOBILE"} EDITION · {new Date().getFullYear()}
           </p>
         </div>
       </section>

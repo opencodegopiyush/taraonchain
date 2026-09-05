@@ -120,6 +120,38 @@
     animation: gold-sheen 5.5s ease-in-out infinite;
   }
 
+  /* ── v7 GoldWord — solid paint, decorative sheen ─────────
+     visibility NEVER depends on background-clip:text here. */
+  .gold-word-wrap {
+    overflow: hidden;
+    /* padding gives the text-shadow room to breathe; negative
+       margins keep the layout box identical */
+    padding: 0.16em 0.1em;
+    margin: -0.16em -0.1em;
+  }
+  .gold-word {
+    color: #eecb69; /* solid gold — renders on every compositor */
+    text-shadow:
+      0 0 22px rgba(227, 185, 92, 0.42),
+      0 0 60px rgba(227, 185, 92, 0.18);
+  }
+  .sheen-swipe {
+    background: linear-gradient(
+      90deg,
+      rgba(246, 227, 161, 0) 0%,
+      rgba(246, 227, 161, 0.34) 45%,
+      rgba(255, 244, 205, 0.5) 50%,
+      rgba(246, 227, 161, 0.34) 55%,
+      rgba(246, 227, 161, 0) 100%
+    );
+    transform: translateX(-130%) skewX(-12deg);
+    opacity: 0;
+    mix-blend-mode: screen;
+  }
+  .sheen-swipe.run {
+    animation: sheen-swipe 1.25s cubic-bezier(0.5, 0, 0.3, 1) both;
+  }
+
   /* ── surfaces ─────────────────────────────────────────────── */
 
   .panel {
@@ -251,7 +283,7 @@
   .rblock {
     position: relative;
     clip-path: inset(0 100% 0 0);
-    transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.25, 1);
+    transition: clip-path 0.6s cubic-bezier(0.65, 0, 0.25, 1);
   }
   .rblock.on {
     clip-path: inset(0 0 0 0);
@@ -269,14 +301,14 @@
     transform: translateX(-6px);
   }
   .rblock.sweep::before {
-    animation: redact-sweep 0.9s cubic-bezier(0.65, 0, 0.25, 1) forwards;
+    animation: redact-sweep 0.6s cubic-bezier(0.65, 0, 0.25, 1) forwards;
   }
 
   .redact-bar {
     background: #0d0a06;
     border: 1px solid rgba(232, 193, 90, 0.14);
     transform-origin: right center;
-    transition: transform 0.7s cubic-bezier(0.65, 0, 0.25, 1);
+    transition: transform 0.48s cubic-bezier(0.65, 0, 0.25, 1);
   }
   .redact-bar.off {
     transform: scaleX(0);
@@ -308,8 +340,41 @@
 
   .t4-spring {
     transition:
-      transform 0.52s cubic-bezier(0.32, 0.72, 0.24, 1.08),
-      opacity 0.3s ease;
+      transform 0.42s cubic-bezier(0.32, 0.72, 0.24, 1.08),
+      opacity 0.26s ease;
+  }
+
+  /* ── v7 glow — opacity pulse on a STATIC shadow ──────────
+     v6 keyframed box-shadow (repaint-heavy). v7 paints the
+     shadow once on a pseudo-layer and only animates opacity
+     → compositor-friendly, noticeably smoother on phones. */
+  .glow-pulse {
+    position: relative;
+  }
+  .glow-pulse::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow:
+      0 0 0 1px rgba(227, 185, 92, 0.3),
+      0 0 44px rgba(227, 185, 92, 0.18);
+    opacity: 0.32;
+    animation: glow-pulse 3.4s ease-in-out infinite;
+  }
+
+  /* mobile edition — drop backdrop blur (biggest phone jank
+     source), pay with a slightly more opaque panel */
+  [data-edition="mobile"] .panel,
+  [data-edition="mobile"] .panel-deep {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  [data-edition="mobile"] .panel {
+    background: rgba(16, 12, 7, 0.93);
+  }
+  [data-edition="mobile"] .panel-deep {
+    background: rgba(13, 10, 6, 0.97);
   }
 }
 
@@ -322,6 +387,33 @@
   }
   50% {
     background-position: -20% 0;
+  }
+}
+
+@keyframes sheen-swipe {
+  0% {
+    transform: translateX(-130%) skewX(-12deg);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(360%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.85;
   }
 }
 
@@ -440,7 +532,7 @@
     animation: stamp-in 0.55s cubic-bezier(0.2, 1.4, 0.36, 1) both;
   }
   .fade-up {
-    animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fade-up 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   .fade-in {
     animation: fade-in 0.5s ease both;
@@ -472,12 +564,21 @@
 
 @media (prefers-reduced-motion: reduce) {
   .gold-text,
+  .sheen-swipe,
+  .glow-pulse,
   .gold-glow,
   .pulse-dot,
   .deco-blink,
   .stamp-in,
   .fade-up,
   .fade-in {
+    animation: none !important;
+  }
+  .sheen-swipe {
+    opacity: 0 !important;
+  }
+  .glow-pulse::after {
+    opacity: 0.5;
     animation: none !important;
   }
   .rblock {

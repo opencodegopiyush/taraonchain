@@ -313,15 +313,18 @@ export default function TraceCanvas() {
       const paused = useStore.getState().paused;
       if (!paused) anim.simT += dt;
 
-      /* idle slow orbit — the file never sits dead */
+      /* idle slow orbit — the file never sits dead. v7: the web
+         edition starts breathing sooner and a touch faster so the
+         comet trails always have a path; mobile keeps the calm v6
+         pacing that already worked there. */
       if (
         !paused &&
         !anim.selSeen &&
-        now - anim.lastInteract > 12000 &&
+        now - anim.lastInteract > TUNE.idleDelay &&
         anim.cam &&
         anim.goal
       ) {
-        anim.cam.theta += 0.006 * dt;
+        anim.cam.theta += TUNE.orbitSpeed * dt;
         anim.goal.theta = anim.cam.theta;
       }
 
@@ -361,7 +364,15 @@ export default function TraceCanvas() {
 
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i];
-        const wp = driftPos(n.pos, t, phases[i][0], phases[i][1], phases[i][2]);
+        const wp = driftPos(
+          n.pos,
+          t,
+          phases[i][0],
+          phases[i][1],
+          phases[i][2],
+          TUNE.driftAmp,
+          TUNE.driftSpeed,
+        );
         const p = project(wp, cam, w, h);
         projs.set(n.id, p);
         if (!p) continue;

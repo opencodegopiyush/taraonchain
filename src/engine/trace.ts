@@ -75,18 +75,21 @@ export function hash01(seed: string): number {
   return (h % 10000) / 10000;
 }
 
-/* gentle organic drift so bubbles feel alive and trails stay fed */
+/* gentle organic drift so bubbles feel alive and trails stay fed
+   amp/spd let the web edition wander further (comets need motion) */
 export function driftPos(
   base: V3,
   t: number,
   p1: number,
   p2: number,
   p3: number,
+  amp = 1,
+  spd = 1,
 ): V3 {
   return [
-    base[0] + Math.sin(t * 0.31 + p1 * 6.283) * 0.55,
-    base[1] + Math.sin(t * 0.23 + p2 * 6.283) * 0.5,
-    base[2] + Math.cos(t * 0.27 + p3 * 6.283) * 0.55,
+    base[0] + Math.sin(t * 0.31 * spd + p1 * 6.283) * 0.55 * amp,
+    base[1] + Math.sin(t * 0.23 * spd + p2 * 6.283) * 0.5 * amp,
+    base[2] + Math.cos(t * 0.27 * spd + p3 * 6.283) * 0.55 * amp,
   ];
 }
 

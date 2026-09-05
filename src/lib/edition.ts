@@ -27,6 +27,11 @@ export const TUNE = EDITION === "web"
       deskTrailLen: 19,
       deskTrailAlpha: 0.52, // clearly visible on big screens
       deskTrailWidth: 0.72,
+      /* desk idle motion — comets need movement to exist */
+      idleDelay: 3500, // ms before the scene starts breathing
+      orbitSpeed: 0.016, // rad/s idle orbit (web: clearly alive)
+      driftAmp: 1.55, // organic bubble wander multiplier
+      driftSpeed: 1.3,
       /* motion */
       speed: 1.0,
       hoverFx: true,
@@ -43,6 +48,10 @@ export const TUNE = EDITION === "web"
       deskTrailLen: 13,
       deskTrailAlpha: 0.46, // full brightness — never faint on a phone
       deskTrailWidth: 0.66,
+      idleDelay: 12000, // phones keep the calm v6 feel
+      orbitSpeed: 0.006,
+      driftAmp: 1.0,
+      driftSpeed: 1.0,
       speed: 0.85, // faster-feeling reveals on small screens
       hoverFx: false,
     };

@@ -9,13 +9,16 @@ import Scramble from "./fx/Scramble";
 import GoldWord from "./fx/GoldWord";
 import { useInView, useCountUp } from "./fx/Reveal";
 
-/* ── v11 landing — ticker replaced by the evidence cloud ────
-   the scrolling data line is gone. in its place: the case id
-   S-0830 · SHARAV rebuilt from living gold particles that
-   assemble, scatter under your finger and spring back. all
-   v10 rules hold: single auto-tuned build, no HOW IT WORKS,
-   no case-number button, stats welded to the file, decrypt
-   open. */
+/* ── v12 landing — the evidence cloud is the brand ─────────
+   the cloud no longer spells a case id. it forms the name
+   itself — TARAONCHAIN — from living gold particles that
+   assemble, scatter under your finger and spring back. no
+   labels, no captions: the band is pure word + interaction.
+   the platform is case-agnostic — many reports, many cases;
+   SHARAV stays only as the latest declassified file below.
+   all v10 rules hold: single auto-tuned build, no HOW IT
+   WORKS, no case-number button, stats welded to the file,
+   decrypt open. */
 
 function Stat({ v, label, suffix }: { v: number; label: string; suffix?: string }) {
   const [ref, on] = useInView<HTMLDivElement>(0.5);
@@ -154,21 +157,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── evidence cloud — the case id, alive ── */}
+      {/* ── the name, alive — no labels, no captions ── */}
       <section className="hairline-t hairline-b relative h-[190px] overflow-hidden bg-[rgba(10,8,5,0.7)] sm:h-[240px]">
         <EvidenceCloud className="absolute inset-0 h-full w-full" />
-        <span className="mono pointer-events-none absolute inset-x-0 bottom-[16%] z-10 text-center text-[11px] font-bold tracking-[0.5em] text-gold/85">
-          SHARAV
-        </span>
-        <span className="label pointer-events-none absolute left-5 top-3 z-10 sm:hidden">
-          EVIDENCE CLOUD
-        </span>
-        <span className="label pointer-events-none absolute left-5 top-3 z-10 hidden sm:block">
-          EVIDENCE CLOUD — CASE S-0830
-        </span>
-        <span className="label pointer-events-none absolute right-5 top-3 z-10 text-gold">
-          TOUCH IT — IT SCATTERS
-        </span>
+        <span className="sr-only">TARAONCHAIN</span>
       </section>
 
       {/* ── the case file — stats live inside, welded to SHARAV ── */}
@@ -273,7 +265,7 @@ export default function Landing() {
             network request is the one that fetched this page.
           </p>
           <p className="label mt-10">
-            TARAONCHAIN TEST BUILD · V10 · SINGLE BUILD · {new Date().getFullYear()}
+            TARAONCHAIN TEST BUILD · V12 · SINGLE BUILD · {new Date().getFullYear()}
           </p>
         </div>
       </section>

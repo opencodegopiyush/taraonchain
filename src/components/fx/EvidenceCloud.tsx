@@ -3,11 +3,13 @@
 import { useEffect, useRef } from "react";
 import { TUNE, retune } from "@/lib/edition";
 
-/* ── EvidenceCloud — v11, replaces the data ticker ───────────
-   the case id "S-0830 · SHARAV" rebuilt from a swarm of living
-   gold particles. fake-3D: every particle carries a z that
+/* ── EvidenceCloud — v12, the band IS the brand ──────────────
+   the word TARAONCHAIN rebuilt from a swarm of living gold
+   particles. fake-3D: every particle carries a z that
    drives its size, brightness and parallax, so the cloud reads
    as a shallow-volume object, not a flat texture.
+   case-agnostic by design — the name belongs to the platform,
+   not to any single report.
 
    reactive by design:
    · assembles — particles are born scattered and spring into
@@ -35,6 +37,7 @@ interface P {
 
 const GOLD = "227, 185, 92";
 const HI = "246, 227, 161";
+const WORD = "TARAONCHAIN";
 
 export default function EvidenceCloud({
   className,
@@ -76,9 +79,10 @@ export default function EvidenceCloud({
       vy: 0,
     };
 
-    /* ── glyph sampling: draw the id offscreen, take pixels.
-       only "S-0830" is particle-formed — the SHARAV caption is
-       DOM text above it (text never depends on canvas here). ── */
+    /* ── glyph sampling: draw the word offscreen, take pixels.
+       the word is fitted to ~86% of the band width so it reads
+       on every viewport; the band holds nothing else — no
+       labels, no captions. ── */
     const sample = () => {
       if (w < 40 || h < 40) return;
       const off = document.createElement("canvas");
@@ -86,12 +90,16 @@ export default function EvidenceCloud({
       off.height = h;
       const c = off.getContext("2d");
       if (!c) return;
-      const main = Math.min(140, Math.max(56, w * 0.13));
-      c.fillStyle = "#fff";
+      const target = w * 0.86;
+      let size = 100;
       c.textAlign = "center";
       c.textBaseline = "middle";
-      c.font = `700 ${main}px "JetBrains Mono", monospace`;
-      c.fillText("S-0830", w / 2, h * 0.42);
+      c.font = `700 ${size}px "JetBrains Mono", monospace`;
+      const measured = c.measureText(WORD).width || 1;
+      size = Math.min(210, Math.max(34, size * (target / measured)));
+      c.font = `700 ${size}px "JetBrains Mono", monospace`;
+      c.fillStyle = "#fff";
+      c.fillText(WORD, w / 2, h * 0.5);
 
       const data = c.getImageData(0, 0, w, h).data;
       const pts: { x: number; y: number }[] = [];
@@ -213,7 +221,7 @@ export default function EvidenceCloud({
       const damp = Math.exp(-DAMP * dt);
       const spring = SPRING * dt;
       const dragBoost = ptr.down ? 2.4 : 1;
-      const psize = w > 700 ? 1.15 : 1;
+      const psize = w > 700 ? 1.3 : 1.05; // longer word = sparser field, slightly fatter dots
 
       for (let i = 0; i < parts.length; i++) {
         const p = parts[i];

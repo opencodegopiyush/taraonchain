@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { TUNE } from "@/lib/edition";
+import { TUNE, retune } from "@/lib/edition";
 
 /* ── HeroTrail — the bubble trail, on the landing page ───────
    ambient gold bubbles drifting upward, each with a comet
@@ -23,6 +23,7 @@ export default function HeroTrail({ className }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+    retune(); // v10: pick desktop/mobile tuning before spawning bubbles
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: true });

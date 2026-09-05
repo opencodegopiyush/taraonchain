@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useStore } from "@/lib/store";
-import { TUNE } from "@/lib/edition";
+import { TUNE, retune } from "@/lib/edition";
 import { NODE_COLORS, SCENE_BG } from "@/lib/palette";
 import type { CaseFile } from "@/lib/types";
 import {
@@ -38,6 +38,7 @@ export default function TraceCanvas() {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+    retune(); // v10: pick desktop/mobile tuning before first frame
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: false });

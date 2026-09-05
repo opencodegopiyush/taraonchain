@@ -363,25 +363,29 @@
     animation: glow-pulse 3.4s ease-in-out infinite;
   }
 
-  /* mobile edition — drop backdrop blur (biggest phone jank
-     source), pay with a slightly more opaque panel */
-  [data-edition="mobile"] .panel,
-  [data-edition="mobile"] .panel-deep {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-  [data-edition="mobile"] .panel {
-    background: rgba(16, 12, 7, 0.93);
-  }
-  [data-edition="mobile"] .panel-deep {
-    background: rgba(13, 10, 6, 0.97);
-  }
-  /* v9 — mobile decrypt arrivals run a touch quicker */
-  [data-edition="mobile"] .decrypt-word {
-    animation-duration: 0.5s;
-  }
-  [data-edition="mobile"] .decrypt-tick {
-    animation-delay: calc(var(--d, 0ms) + 0.28s);
+  /* ── v10 auto-tuning (was: baked mobile edition) ──────
+     coarse pointer (phones/tablets) → drop backdrop blur
+     (biggest touch jank source, pay with a slightly more
+     opaque panel) + decrypt arrivals run a touch quicker.
+     pure media query — no JS, no flash, no build flag. */
+  @media (pointer: coarse) {
+    .panel,
+    .panel-deep {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    .panel {
+      background: rgba(16, 12, 7, 0.93);
+    }
+    .panel-deep {
+      background: rgba(13, 10, 6, 0.97);
+    }
+    .decrypt-word {
+      animation-duration: 0.5s;
+    }
+    .decrypt-tick {
+      animation-delay: calc(var(--d, 0ms) + 0.28s);
+    }
   }
 }
 

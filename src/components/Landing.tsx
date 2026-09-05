@@ -2,25 +2,18 @@
 
 import { useRef } from "react";
 import { useStore, reviewedPct } from "@/lib/store";
-import { EDITION, TUNE } from "@/lib/edition";
+import { TUNE, useDevice } from "@/lib/edition";
 import HeroTrail from "./fx/HeroTrail";
 import Scramble from "./fx/Scramble";
 import GoldWord from "./fx/GoldWord";
 import { useInView, useCountUp } from "./fx/Reveal";
 
-/* ── v9 landing — the open animation rebuilt ─────────────────
-   user-directed changes from v8:
-   · HOW IT WORKS — removed from the page entirely
-   · OPEN CASE button (case + case number) — removed. the file
-     itself is the entry point: tap anywhere on the case card.
-   · stats — welded INTO the case file as its FOOTPRINT
-     (measured from case S-0830), no longer hanging loose on
-     the page. the numbers belong to SHARAV.
-   · redact-bar / clip-path reveal — gone from the landing.
-     new open sequence is pure CSS, time-based, cover-free:
-     words are never hidden by any overlay, they arrive via
-     blur→sharp decrypt + a gold scanner tick + a one-shot
-     scan sweep. if anything fails, text simply shows. */
+/* ── v10 landing — single build, auto-tuned ─────────────
+   one binary for phone and desktop: the device is detected
+   on mount and the tuning table (bubbles, trails, speeds,
+   hover fx) is applied live. v9 changes all hold: no HOW IT
+   WORKS, no case-number button (the file itself opens),
+   stats welded into the case file, cover-free decrypt open. */
 
 const TICKER = [
   "CASE S-0830 · SHARAV",
@@ -104,10 +97,12 @@ export default function Landing() {
 
   const [cardRef, cardOn] = useInView<HTMLDivElement>(0.18);
 
-  /* web edition: the case card tilts toward your cursor.
+  const device = useDevice();
+
+  /* desktop: the case card tilts toward your cursor.
      transform-only (compositor-friendly), reset on leave. */
   const tiltRef = useRef<HTMLDivElement | null>(null);
-  const onCardMove = TUNE.hoverFx
+  const onCardMove = device === "desktop"
     ? (e: React.PointerEvent) => {
         const el = tiltRef.current;
         if (!el || e.pointerType !== "mouse") return;
@@ -117,7 +112,7 @@ export default function Landing() {
         el.style.transform = `perspective(900px) rotateX(${(-dy * 2.4).toFixed(2)}deg) rotateY(${(dx * 2.8).toFixed(2)}deg)`;
       }
     : undefined;
-  const onCardLeave = TUNE.hoverFx
+  const onCardLeave = device === "desktop"
     ? () => {
         const el = tiltRef.current;
         if (el) el.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
@@ -297,7 +292,7 @@ export default function Landing() {
             network request is the one that fetched this page.
           </p>
           <p className="label mt-10">
-            TARAONCHAIN TEST BUILD · V9 · {EDITION === "web" ? "WEB" : "MOBILE"} EDITION · {new Date().getFullYear()}
+            TARAONCHAIN TEST BUILD · V10 · SINGLE BUILD · {new Date().getFullYear()}
           </p>
         </div>
       </section>

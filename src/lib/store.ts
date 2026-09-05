@@ -9,7 +9,7 @@ import { CASE } from "./case-data";
    selectedNodeId; nothing re-renders per frame. */
 
 export type View = "landing" | "desk";
-export type OverlayName = "report" | "method" | null;
+export type OverlayName = "report" | null; // v8: METHOD page removed
 
 export interface CamCmd {
   target: [number, number, number];

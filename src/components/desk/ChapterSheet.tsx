@@ -98,13 +98,48 @@ export default function ChapterSheet() {
           }}
         >
           <div className="mx-auto mb-2.5 h-1 w-10 rounded-full bg-[rgba(232,193,90,0.3)]" />
-          <div className="flex items-center justify-between">
-            <span className="mono text-[10px] font-bold tracking-[0.2em] text-gold">
+          <div className="flex items-center gap-2">
+            <span className="mono shrink-0 text-[10px] font-bold tracking-[0.2em] text-gold">
               CH {ch.no}
             </span>
-            <span className="label">
-              {snap === 0 ? "SWIPE ↑ TO DECLASSIFY" : `${chapter + 1} / ${cf.chapters.length}`}
+            <span className="label flex-1 truncate text-center">
+              {snap === 0 ? "SWIPE ↑ TO DECLASSIFY" : ""}
             </span>
+            {/* v8 — chapter stepper on the sheet itself: switchable
+                while reading, thumb-reachable, no trip to the top bar */}
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                onClick={() => prev()}
+                disabled={chapter === 0}
+                aria-label="Previous chapter"
+                className="mono flex h-8 w-8 items-center justify-center border text-[13px] transition-colors disabled:opacity-30"
+                style={{
+                  borderColor: chapter === 0 ? "var(--line)" : "rgba(227,185,92,0.4)",
+                  color: chapter === 0 ? "var(--faint)" : "var(--gold-hi)",
+                  background: "rgba(10,8,5,0.5)",
+                }}
+              >
+                ‹
+              </button>
+              <span className="mono w-9 text-center text-[10px] tabular-nums text-mute">
+                {chapter + 1}/{cf.chapters.length}
+              </span>
+              <button
+                onClick={() => next()}
+                disabled={chapter === cf.chapters.length - 1}
+                aria-label="Next chapter"
+                className="mono flex h-8 w-8 items-center justify-center border text-[13px] transition-colors disabled:opacity-30"
+                style={{
+                  borderColor:
+                    chapter === cf.chapters.length - 1 ? "var(--line)" : "rgba(227,185,92,0.4)",
+                  color:
+                    chapter === cf.chapters.length - 1 ? "var(--faint)" : "var(--gold-hi)",
+                  background: "rgba(227,185,92,0.08)",
+                }}
+              >
+                ›
+              </button>
+            </div>
           </div>
           <p className="label mt-1.5 truncate">{ch.kicker}</p>
           <h3 className="disp mt-0.5 truncate text-[17px] font-bold text-ink">
@@ -180,11 +215,13 @@ function ChapterBody({
   chapter,
   active,
   mobile = false,
+  desktop = false,
 }: {
   cf: ReturnType<typeof useStore.getState>["caseFile"];
   chapter: number;
   active: boolean;
   mobile?: boolean;
+  desktop?: boolean;
 }) {
   const ch = cf.chapters[chapter];
   const selectNode = useStore((s) => s.selectNode);

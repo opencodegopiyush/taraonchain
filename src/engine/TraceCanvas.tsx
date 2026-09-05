@@ -187,8 +187,11 @@ export default function TraceCanvas() {
       const dy = e.clientY - drag.y;
       if (Math.hypot(dx, dy) > 8) drag.moved = true;
       if (!drag.moved) return;
-      const th = clamp(drag.th - dx * 0.0052, -Math.PI * 4, Math.PI * 4);
-      const ph = clamp(drag.ph - dy * 0.0042, 0.3, 2.55);
+      /* v8 — drag feels slightly livelier: +31% rotation per
+         pixel, camera eases to the goal a touch quicker. still
+         smooth, never twitchy. */
+      const th = clamp(drag.th - dx * 0.0068, -Math.PI * 4, Math.PI * 4);
+      const ph = clamp(drag.ph - dy * 0.0055, 0.3, 2.55);
       anim.cam.theta = th;
       anim.cam.phi = ph;
       anim.goal.theta = th;
@@ -330,7 +333,7 @@ export default function TraceCanvas() {
 
       /* ease cam → goal */
       if (anim.cam && anim.goal) {
-        const k = 1 - Math.pow(0.0022, dt);
+        const k = 1 - Math.pow(0.0009, dt);
         anim.cam.target[0] += (anim.goal.target[0] - anim.cam.target[0]) * k;
         anim.cam.target[1] += (anim.goal.target[1] - anim.cam.target[1]) * k;
         anim.cam.target[2] += (anim.goal.target[2] - anim.cam.target[2]) * k;

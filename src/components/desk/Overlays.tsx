@@ -4,8 +4,9 @@ import { useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { EPI_COLORS, EPI_LABEL } from "@/lib/palette";
 
-/* ── full-screen overlays — REPORT (findings · evidence · next
-   steps) and METHOD (epistemics · limitations). esc or ✕. ── */
+/* ── full-screen overlays — the CASE FILE report (findings ·
+   evidence · next steps). v8: the METHOD page is gone — the
+   landing is minimal, one case, one door. esc or ✕. ── */
 
 export default function Overlays() {
   const overlay = useStore((s) => s.overlay);
@@ -33,7 +34,7 @@ export default function Overlays() {
     <div className="fade-in fixed inset-0 z-50 flex flex-col" style={{ background: "rgba(6,5,3,0.92)" }}>
       <div className="panel-deep hairline-b flex h-12 shrink-0 items-center justify-between px-4">
         <span className="mono text-[11px] font-bold tracking-[0.24em] text-gold">
-          {overlay === "report" ? `CASE FILE · ${cf.id} · ${cf.codename}` : "METHOD & EPISTEMICS"}
+          CASE FILE · {cf.id} · {cf.codename}
         </span>
         <button
           onClick={() => setOverlay(null)}
@@ -46,7 +47,7 @@ export default function Overlays() {
 
       <div className="slim-scroll flex-1 overflow-y-auto px-5 py-6 sm:px-8">
         <div className="mx-auto w-full max-w-3xl">
-          {overlay === "report" ? <Report /> : <Method />}
+          <Report />
         </div>
       </div>
     </div>
@@ -184,65 +185,6 @@ function Report() {
           <p className="text-[12.5px] leading-relaxed text-mute">{cf.limitations}</p>
         </section>
       )}
-
-      {cf.sourceNote && (
-        <p className="mono border-t pt-4 text-[10px] leading-relaxed tracking-[0.06em] text-faint">
-          {cf.sourceNote}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function Method() {
-  const cf = useStore((s) => s.caseFile);
-  return (
-    <div className="space-y-8">
-      <section>
-        <p className="label mb-3">HOW TO READ THIS FILE</p>
-        <p className="read">{cf.method}</p>
-      </section>
-
-      <section>
-        <p className="label mb-3">EPISTEMIC TAGS</p>
-        <div className="space-y-2">
-          {(["observed", "assessed", "unknown"] as const).map((e) => (
-            <div key={e} className="flex items-start gap-3 border bg-[rgba(10,8,5,0.5)] px-3 py-3" style={{ borderColor: EPI_COLORS[e] }}>
-              <span
-                className="mono mt-0.5 shrink-0 text-[9px] font-bold tracking-[0.16em]"
-                style={{ color: EPI_COLORS[e] }}
-              >
-                {EPI_LABEL[e]}
-              </span>
-              <p className="text-[12.5px] leading-relaxed text-bone">
-                {e === "observed"
-                  ? "Read directly from the chain — signatures, slots, balances. Not an opinion."
-                  : e === "assessed"
-                    ? "An inference the analyst is willing to defend, with the basis stated."
-                    : "A gap in the record. Stated as unknown rather than papered over."}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <p className="label mb-3">NAVIGATION</p>
-        <div className="space-y-2 text-[12.5px] leading-relaxed text-bone">
-          <p>
-            <span className="mono text-gold">DRAG</span> the viewport to orbit the
-            graph. <span className="mono text-gold">PINCH</span> or{" "}
-            <span className="mono text-gold">SCROLL</span> to zoom.{" "}
-            <span className="mono text-gold">TAP</span> a bubble to pull its file —
-            the camera swings it to center so the card never covers it.
-          </p>
-          <p>
-            <span className="mono text-gold">DOUBLE-TAP</span> or the chapter rail
-            re-frames the current chapter. Chapters advance with the ‹ › stepper;
-            the gold percentage is how much of the file you have walked through.
-          </p>
-        </div>
-      </section>
 
       {cf.sourceNote && (
         <p className="mono border-t pt-4 text-[10px] leading-relaxed tracking-[0.06em] text-faint">

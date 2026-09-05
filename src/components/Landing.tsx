@@ -8,12 +8,46 @@ import Scramble from "./fx/Scramble";
 import GoldWord from "./fx/GoldWord";
 import { useInView, useCountUp, RedactBlock, RedactWord } from "./fx/Reveal";
 
-/* ── v7 landing — two editions, one page ─────────────────────
-   every animation is css/canvas and renders identically on
-   phone and desktop; the tuning (particle counts, trail
-   brightness, hover flourishes) comes from TUNE[edition].
-   headline no longer trusts background-clip:text — the gold
-   word is solid paint + a decorative sheen sweep. */
+/* ── v8 landing — minimal, one case, no method page ──────────
+   copy per user: eyebrow + headline + new intro paragraphs,
+   DRAG hint stays; METHOD removed entirely; stats live right
+   above the case card. every animation is css/canvas and
+   renders identically on phone and desktop. */
+
+const TICKER = [
+  "CASE S-0830 · SHARAV",
+  "SOLANA",
+  "TOKEN CREATED AUG 30 · 07:59:52 UTC",
+  "SLOT 442,828,340",
+  "PEAK MCAP $512,327",
+  "≈$25,150 EXTRACTED",
+  "−98.8% FROM PEAK",
+  "8 SIGNATURES ON EVIDENCE LOCK",
+  "ZERO TELEMETRY",
+];
+
+function Ticker() {
+  const row = [...TICKER, ...TICKER];
+  return (
+    <div className="hairline-t hairline-b relative overflow-hidden bg-[rgba(10,8,5,0.7)] py-2.5">
+      <div className="ticker flex w-max items-center gap-8 whitespace-nowrap">
+        {[0, 1].map((half) => (
+          <div key={half} className="flex items-center gap-8" aria-hidden={half === 1}>
+            {row.map((t, i) => (
+              <span
+                key={`${half}-${i}`}
+                className="mono flex items-center gap-8 text-[10px] tracking-[0.22em] text-faint"
+              >
+                {t}
+                <span className="text-[7px] text-gold">◆</span>
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Stat({ v, label, suffix }: { v: number; label: string; suffix?: string }) {
   const [ref, on] = useInView<HTMLDivElement>(0.5);
@@ -49,47 +83,58 @@ const STEPS = [
   },
 ];
 
-function HowItWorks() {
+function HowItWorks({
+  howRef,
+  howOn,
+}: {
+  howRef: React.RefObject<HTMLDivElement | null>;
+  howOn: boolean;
+}) {
   const [lit, setLit] = useState<number | null>(null);
   return (
-    <section className="hairline-t relative px-5 py-14 sm:px-8 sm:py-20">
-      <div className="mx-auto w-full max-w-3xl">
+    <section className="relative px-5 py-14 sm:px-8 sm:py-20">
+      <div ref={howRef} className="mx-auto w-full max-w-3xl">
         <p className="label mb-6">
           <Scramble text="HOW IT WORKS — THREE MOVES" duration={650} />
         </p>
         <div className="grid gap-3 sm:grid-cols-3">
           {STEPS.map((s, i) => (
-            <button
+            <div
               key={s.n}
-              type="button"
-              onPointerEnter={() => setLit(i)}
-              onPointerLeave={() => setLit(null)}
-              onPointerDown={() => setLit(i)}
-              className={`panel t4-spring relative overflow-hidden p-4 text-left active:scale-[0.985] sm:p-5 ${
-                lit === i ? "border-[rgba(227,185,92,0.5)]" : ""
-              }`}
-              style={
-                lit === i
-                  ? { boxShadow: "0 0 26px rgba(227,185,92,0.14), inset 0 0 22px rgba(227,185,92,0.05)" }
-                  : undefined
-              }
+              className={`fade-up ${howOn ? "" : "opacity-0"}`}
+              style={{ animationDelay: `${i * 130}ms` }}
             >
-              <span
-                className={`disp text-3xl font-bold t4-spring ${
-                  lit === i ? "text-gold-hi" : "text-[rgba(227,185,92,0.28)]"
+              <button
+                type="button"
+                onPointerEnter={() => setLit(i)}
+                onPointerLeave={() => setLit(null)}
+                onPointerDown={() => setLit(i)}
+                className={`panel t4-spring relative h-full w-full overflow-hidden p-4 text-left active:scale-[0.985] sm:p-5 ${
+                  lit === i ? "border-[rgba(227,185,92,0.5)]" : ""
                 }`}
+                style={
+                  lit === i
+                    ? { boxShadow: "0 0 26px rgba(227,185,92,0.14), inset 0 0 22px rgba(227,185,92,0.05)" }
+                    : undefined
+                }
               >
-                {s.n}
-              </span>
-              <p className="label mt-3 mb-2" style={{ color: lit === i ? "var(--gold)" : undefined }}>
-                {s.t}
-              </p>
-              <p className="text-[12.5px] leading-relaxed text-mute">{s.d}</p>
-              <span
-                className={`absolute bottom-0 left-0 h-[2px] bg-[linear-gradient(90deg,var(--gold),transparent)] t4-spring`}
-                style={{ width: lit === i ? "100%" : "18%" }}
-              />
-            </button>
+                <span
+                  className={`disp text-3xl font-bold t4-spring ${
+                    lit === i ? "text-gold-hi" : "text-[rgba(227,185,92,0.28)]"
+                  }`}
+                >
+                  {s.n}
+                </span>
+                <p className="label mt-3 mb-2" style={{ color: lit === i ? "var(--gold)" : undefined }}>
+                  {s.t}
+                </p>
+                <p className="text-[12.5px] leading-relaxed text-mute">{s.d}</p>
+                <span
+                  className={`absolute bottom-0 left-0 h-[2px] bg-[linear-gradient(90deg,var(--gold),transparent)] t4-spring`}
+                  style={{ width: lit === i ? "100%" : "18%" }}
+                />
+              </button>
+            </div>
           ))}
         </div>
       </div>
@@ -99,13 +144,13 @@ function HowItWorks() {
 
 export default function Landing() {
   const openCase = useStore((s) => s.openCase);
-  const setOverlay = useStore((s) => s.setOverlay);
   const cf = useStore((s) => s.caseFile);
   const visited = useStore((s) => s.visited);
   const pct = reviewedPct({ visited, caseFile: cf });
 
   const [heroRef, heroOn] = useInView<HTMLDivElement>(0.15);
-  const [cardRef, cardOn] = useInView<HTMLDivElement>(0.25);
+  const [cardRef, cardOn] = useInView<HTMLDivElement>(0.18);
+  const [howRef, howOn] = useInView<HTMLDivElement>(0.2);
 
   /* web edition: the case card tilts toward your cursor.
      transform-only (compositor-friendly), reset on leave. */
@@ -178,10 +223,16 @@ export default function Landing() {
 
           <RedactBlock active={heroOn} delay={880} className="mt-7 max-w-xl">
             <p className="read text-[15px] sm:text-base">
-              The mempool forgets nothing. TARAONCHAIN turns verified
-              investigation reports into case files you can walk through —
-              every bubble a wallet, every gold thread a movement of funds,
-              every claim stamped with what is observed, assessed or unknown.
+              The mempool forgets nothing. TARAONCHAIN conducts independent
+              on-chain investigations tracing wallets, reconstructing movements
+              of funds, and examining the relationships hidden within public
+              transaction data.
+            </p>
+            <p className="read mt-3 text-[15px] sm:text-base">
+              Every case is built from the chain itself and documented as an
+              interactive investigation — allowing the evidence, transaction
+              paths, and analytical reasoning behind each finding to be
+              examined directly.
             </p>
           </RedactBlock>
 
@@ -191,9 +242,6 @@ export default function Landing() {
           >
             <button className="btn btn-gold" onClick={fire}>
               OPEN CASE {cf.id} ▸
-            </button>
-            <button className="btn btn-ghost" onClick={() => setOverlay("method")}>
-              METHOD
             </button>
           </div>
 
@@ -211,8 +259,14 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── stats strip ── */}
-      <section className="hairline-t hairline-b relative bg-[rgba(12,10,6,0.6)]">
+      {/* ── data ticker ── */}
+      <Ticker />
+
+      {/* ── how it works ── */}
+      <HowItWorks howRef={howRef} howOn={howOn} />
+
+      {/* ── stats + case card — the numbers lead into the file ── */}
+      <section className="hairline-t relative bg-[rgba(12,10,6,0.6)]">
         <div className="mx-auto grid max-w-4xl grid-cols-2 divide-x divide-[var(--line)] sm:grid-cols-4">
           <Stat v={cf.stats.entities} label="ENTITIES MAPPED" />
           <Stat v={cf.stats.hops} label="LINKS TRACED" />
@@ -221,10 +275,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── how it works ── */}
-      <HowItWorks />
-
-      {/* ── case card ── */}
       <section className="relative px-5 py-14 sm:px-8 sm:py-20">
         <div ref={cardRef} className="mx-auto w-full max-w-3xl">
           <p className="label mb-4">
@@ -269,9 +319,9 @@ export default function Landing() {
                 <span className="label">DECLASSIFIED</span>
                 <span className="mono text-[11px] text-gold">{Math.max(pct, visited.length > 0 ? pct : 0)}%{pct === 0 ? " · UNOPENED" : " REVIEWED"}</span>
               </div>
-              <div className="h-[3px] w-full bg-[rgba(232,193,90,0.12)]">
+              <div className="h-[3px] w-full overflow-hidden bg-[rgba(232,193,90,0.12)]">
                 <div
-                  className="h-full bg-[linear-gradient(90deg,var(--gold-dim),var(--gold-hi))] transition-all duration-1000"
+                  className="declassify-bar h-full bg-[linear-gradient(90deg,var(--gold-dim),var(--gold-hi))] transition-all duration-1000"
                   style={{ width: `${Math.max(pct, 8)}%` }}
                 />
               </div>
@@ -299,7 +349,7 @@ export default function Landing() {
             </p>
           </RedactBlock>
           <p className="label mt-10">
-            TARAONCHAIN TEST BUILD · V7 · {EDITION === "web" ? "WEB" : "MOBILE"} EDITION · {new Date().getFullYear()}
+            TARAONCHAIN TEST BUILD · V8 · {EDITION === "web" ? "WEB" : "MOBILE"} EDITION · {new Date().getFullYear()}
           </p>
         </div>
       </section>

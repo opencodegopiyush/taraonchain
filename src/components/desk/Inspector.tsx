@@ -21,6 +21,41 @@ import type { CaseEdge, CaseNode } from "@/lib/types";
 
 type Tab = "overview" | "links" | "txns";
 
+/* ── v8 copy — works on mobile + plain http ──────────────────
+   navigator.clipboard only exists in secure contexts (https or
+   localhost). Over LAN-IP http on a phone it is undefined, so
+   the old code threw and silently gave up — the COPY button
+   "did nothing". Fallback: classic execCommand('copy') via a
+   throwaway textarea, which works on http and most mobile
+   browsers inside the tap gesture. */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    /* fall through to the legacy path */
+  }
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-1000px";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 export default function Inspector() {
   const node = useStore((s) => s.caseFile.nodes.find((n) => n.id === s.selectedNodeId));
   const cf = useStore((s) => s.caseFile);
@@ -64,13 +99,18 @@ function Card({
     [conns],
   );
 
+  const [copyFail, setCopyFail] = useState<string | null>(null);
+
   const copy = async (text: string, tag: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
+    const ok = await copyText(text);
+    if (ok) {
       setCopied(tag);
+      setCopyFail(null);
       setTimeout(() => setCopied(null), 1200);
-    } catch {
-      /* clipboard unavailable — harmless */
+    } else {
+      /* even on total failure, say so — never a dead button */
+      setCopyFail(tag);
+      setTimeout(() => setCopyFail(null), 1400);
     }
   };
 
@@ -185,12 +225,12 @@ function Card({
       {/* body */}
       <div className="slim-scroll flex-1 overflow-y-auto px-4 py-4">
         {tab === "overview" && (
-          <Overview node={node} copy={copy} copied={copied} />
+          <Overview node={node} copy={copy} copied={copied} copyFail={copyFail} />
         )}
         {tab === "links" && (
           <Links conns={conns} copy={copy} copied={copied} />
         )}
-        {tab === "txns" && <Txns txs={txs} copy={copy} copied={copied} />}
+        {tab === "txns" && <Txns txs={txs} copy={copy} copied={copied} copyFail={copyFail} />}
       </div>
     </aside>
   );
@@ -200,10 +240,12 @@ function Overview({
   node,
   copy,
   copied,
+  copyFail,
 }: {
   node: CaseNode;
   copy: (t: string, tag: string) => void;
   copied: string | null;
+  copyFail: string | null;
 }) {
   const unit = node.chain.includes("SOLANA") ? "SOL" : "";
   return (
@@ -213,8 +255,18 @@ function Overview({
         onClick={() => copy(node.address, "addr")}
       >
         <span className="truncate text-[11px] text-bone">{node.address}</span>
-        <span className="label shrink-0" style={{ color: copied === "addr" ? "var(--gold)" : undefined }}>
-          {copied === "addr" ? "COPIED ✓" : "COPY"}
+        <span
+          className="label shrink-0"
+          style={{
+            color:
+              copied === "addr"
+                ? "var(--gold)"
+                : copyFail === "addr"
+                  ? "var(--ember)"
+                  : undefined,
+          }}
+        >
+          {copied === "addr" ? "COPIED ✓" : copyFail === "addr" ? "OPEN KEYBOARD TO COPY" : "COPY"}
         </span>
       </button>
 
@@ -322,10 +374,12 @@ function Txns({
   txs,
   copy,
   copied,
+  copyFail,
 }: {
   txs: { hash: string; ts: string; value: number; chain: string; kind: string; via: string }[];
   copy: (t: string, tag: string) => void;
   copied: string | null;
+  copyFail: string | null;
 }) {
   if (txs.length === 0)
     return <p className="label py-6 text-center">NO TRANSACTIONS ON RECORD</p>;
@@ -343,9 +397,16 @@ function Txns({
             </span>
             <span
               className="label shrink-0"
-              style={{ color: copied === `tx${i}` ? "var(--gold)" : undefined }}
+              style={{
+                color:
+                  copied === `tx${i}`
+                    ? "var(--gold)"
+                    : copyFail === `tx${i}`
+                      ? "var(--ember)"
+                      : undefined,
+              }}
             >
-              {copied === `tx${i}` ? "COPIED ✓" : "COPY"}
+              {copied === `tx${i}` ? "COPIED ✓" : copyFail === `tx${i}` ? "COPY ✕" : "COPY"}
             </span>
           </div>
           <div className="mt-1 flex items-center justify-between">

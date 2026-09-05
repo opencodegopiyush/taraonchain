@@ -1,0 +1,487 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   TARAONCHAIN — v6 "REDACTED"
+   privacy-first forensic instrument · black & gold only
+   bone = observed · gold = assessed · ember = risk · smoke = unknown
+   fonts: space grotesk (display) · jetbrains mono (chrome/data)
+          source serif 4 (reading)
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --bg: #080704;
+  --bg-deep: #060503;
+  --panel: rgba(20, 16, 10, 0.88);
+  --panel-deep: rgba(17, 13, 8, 0.94);
+  --ink: #f2ead8;
+  --mute: #b0a48c;
+  --faint: #7a7060;
+  --gold: #e3b95c;
+  --gold-hi: #f6e3a1;
+  --gold-dim: #a67c2e;
+  --bone: #e6d9b8;
+  --ember: #e06a45;
+  --smoke: #877e6c;
+  --line: rgba(232, 193, 90, 0.1);
+  --line-strong: rgba(232, 193, 90, 0.26);
+
+  --font-disp: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
+  --font-ui: "JetBrains Mono", "SFMono-Regular", Menlo, monospace;
+  --font-read: "Source Serif 4 Variable", "Source Serif 4", Georgia, serif;
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--ink);
+  --color-gold: var(--gold);
+  --color-gold-hi: var(--gold-hi);
+  --color-bone: var(--bone);
+  --color-mute: var(--mute);
+  --color-faint: var(--faint);
+  --color-ember: var(--ember);
+  --color-smoke: var(--smoke);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-panel: var(--panel);
+  --color-panel-deep: var(--panel-deep);
+  --font-disp: var(--font-disp);
+  --font-ui: var(--font-ui);
+  --font-read: var(--font-read);
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    background: var(--bg);
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    overscroll-behavior: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: rgba(227, 185, 92, 0.28);
+    color: var(--gold-hi);
+  }
+}
+
+/* custom classes live in the components layer so tailwind
+   utilities (hidden, sm:inline-flex, text-[..]) always win */
+@layer components {
+  /* ── type helpers ─────────────────────────────────────────── */
+
+  .mono {
+    font-family: var(--font-ui);
+  }
+  .disp {
+    font-family: var(--font-disp);
+    letter-spacing: -0.015em;
+  }
+  .read {
+    font-family: var(--font-read);
+    font-size: 15.5px;
+    line-height: 1.72;
+    color: var(--bone);
+  }
+
+  .label {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .gold-text {
+    background: linear-gradient(
+      100deg,
+      #a67c2e 0%,
+      #e3b95c 22%,
+      #f6e3a1 50%,
+      #e3b95c 78%,
+      #a67c2e 100%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gold-sheen 5.5s ease-in-out infinite;
+  }
+
+  /* ── surfaces ─────────────────────────────────────────────── */
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .panel-deep {
+    background: var(--panel-deep);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .hairline-t {
+    border-top: 1px solid var(--line);
+  }
+  .hairline-b {
+    border-bottom: 1px solid var(--line);
+  }
+  .hairline-r {
+    border-right: 1px solid var(--line);
+  }
+  .hairline-l {
+    border-left: 1px solid var(--line);
+  }
+
+  /* forensic scanline texture — barely-there, adds instrument feel */
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(232, 193, 90, 0.022) 0px,
+      rgba(232, 193, 90, 0.022) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+    mix-blend-mode: screen;
+  }
+
+  /* ── buttons & chips ──────────────────────────────────────── */
+
+  .btn {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 20px;
+    transition:
+      transform 0.16s ease,
+      background 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease,
+      box-shadow 0.3s ease;
+    user-select: none;
+    cursor: pointer;
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn-gold {
+    background: linear-gradient(160deg, #f0cd75 0%, #e3b95c 55%, #c99b3f 100%);
+    color: #1a1206;
+    border: 1px solid rgba(246, 227, 161, 0.6);
+    font-weight: 700;
+    box-shadow:
+      0 0 0 1px rgba(227, 185, 92, 0.12),
+      0 8px 28px rgba(227, 185, 92, 0.16);
+  }
+  .btn-gold:hover {
+    box-shadow:
+      0 0 0 1px rgba(227, 185, 92, 0.3),
+      0 10px 36px rgba(227, 185, 92, 0.28);
+  }
+
+  .btn-ghost {
+    background: rgba(20, 16, 10, 0.6);
+    color: var(--bone);
+    border: 1px solid var(--line-strong);
+  }
+  .btn-ghost:hover {
+    border-color: rgba(232, 193, 90, 0.5);
+    color: var(--gold-hi);
+  }
+
+  .chip {
+    font-family: var(--font-ui);
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    border: 1px solid var(--line);
+    color: var(--mute);
+    background: rgba(10, 8, 5, 0.5);
+    white-space: nowrap;
+  }
+
+  .stamp {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1.5px solid rgba(227, 185, 92, 0.45);
+    padding: 5px 10px 5px 12px;
+    display: inline-block;
+    box-shadow: inset 0 0 12px rgba(227, 185, 92, 0.07);
+  }
+
+  /* ── redaction reveal ─────────────────────────────────────── */
+
+  .rblock {
+    position: relative;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.25, 1);
+  }
+  .rblock.on {
+    clip-path: inset(0 0 0 0);
+  }
+  .rblock::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    left: 0;
+    width: 3px;
+    background: var(--gold);
+    box-shadow: 0 0 14px rgba(227, 185, 92, 0.55);
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  .rblock.sweep::before {
+    animation: redact-sweep 0.9s cubic-bezier(0.65, 0, 0.25, 1) forwards;
+  }
+
+  .redact-bar {
+    background: #0d0a06;
+    border: 1px solid rgba(232, 193, 90, 0.14);
+    transform-origin: right center;
+    transition: transform 0.7s cubic-bezier(0.65, 0, 0.25, 1);
+  }
+  .redact-bar.off {
+    transform: scaleX(0);
+  }
+
+  /* ── scrollbars ───────────────────────────────────────────── */
+
+  .slim-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(232, 193, 90, 0.22) transparent;
+  }
+  .slim-scroll::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .slim-scroll::-webkit-scrollbar-thumb {
+    background: rgba(232, 193, 90, 0.22);
+    border-radius: 4px;
+  }
+  .slim-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .t4-spring {
+    transition:
+      transform 0.52s cubic-bezier(0.32, 0.72, 0.24, 1.08),
+      opacity 0.3s ease;
+  }
+}
+
+/* ── motion (keyframes live outside layers) ────────────────── */
+
+@keyframes gold-sheen {
+  0%,
+  100% {
+    background-position: 220% 0;
+  }
+  50% {
+    background-position: -20% 0;
+  }
+}
+
+@keyframes redact-sweep {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  97% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(calc(100% + 100cqw));
+  }
+}
+
+@keyframes gold-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(227, 185, 92, 0.16),
+      0 0 26px rgba(227, 185, 92, 0.09);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(227, 185, 92, 0.34),
+      0 0 44px rgba(227, 185, 92, 0.2);
+  }
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.7) rotate(-14deg);
+  }
+  62% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-7deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-8deg);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ripple-ink {
+  from {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(227, 185, 92, 0.8);
+  }
+  50% {
+    opacity: 0.45;
+    box-shadow: 0 0 2px rgba(227, 185, 92, 0.3);
+  }
+}
+
+@keyframes blink-caret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes deco-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@layer components {
+  .gold-glow {
+    animation: gold-glow 3.6s ease-in-out infinite;
+  }
+  .stamp-in {
+    animation: stamp-in 0.55s cubic-bezier(0.2, 1.4, 0.36, 1) both;
+  }
+  .fade-up {
+    animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .fade-in {
+    animation: fade-in 0.5s ease both;
+  }
+  .ripple-ink {
+    position: absolute;
+    width: 340px;
+    height: 340px;
+    border-radius: 9999px;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(227, 185, 92, 0.4) 0%, rgba(227, 185, 92, 0) 62%);
+    animation: ripple-ink 0.7s ease-out forwards;
+  }
+  .pulse-dot {
+    animation: pulse-dot 1.9s ease-in-out infinite;
+  }
+  .caret::after {
+    content: "▌";
+    margin-left: 2px;
+    color: var(--gold);
+    animation: blink-caret 1.05s step-end infinite;
+  }
+  .deco-blink {
+    animation: deco-blink 1.6s steps(2, start) infinite;
+  }
+}
+
+/* ── reduced motion ───────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .gold-text,
+  .gold-glow,
+  .pulse-dot,
+  .deco-blink,
+  .stamp-in,
+  .fade-up,
+  .fade-in {
+    animation: none !important;
+  }
+  .rblock {
+    clip-path: none;
+    transition: none;
+  }
+}

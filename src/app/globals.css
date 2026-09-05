@@ -376,6 +376,13 @@
   [data-edition="mobile"] .panel-deep {
     background: rgba(13, 10, 6, 0.97);
   }
+  /* v9 — mobile decrypt arrivals run a touch quicker */
+  [data-edition="mobile"] .decrypt-word {
+    animation-duration: 0.5s;
+  }
+  [data-edition="mobile"] .decrypt-tick {
+    animation-delay: calc(var(--d, 0ms) + 0.28s);
+  }
 }
 
 /* ── motion (keyframes live outside layers) ────────────────── */
@@ -434,6 +441,107 @@
   }
   100% {
     transform: translateX(340px);
+    opacity: 0;
+  }
+}
+
+/* ── v9 landing decrypt reveal ─────────────────────────────
+   RULE: words are NEVER covered by an overlay and NEVER
+   clipped. visibility cannot depend on JS, an observer or a
+   transition completing. the open sequence is pure CSS and
+   time-based — blur→sharp arrival, a gold scanner tick that
+   draws under each word then fades, and a one-shot scan sweep
+   down the hero. failure mode of every piece: text shows. */
+
+.decrypt-word {
+  animation: decrypt-in 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.decrypt-tick {
+  position: absolute;
+  left: 2%;
+  right: 2%;
+  bottom: -0.1em;
+  height: 0.055em;
+  background: linear-gradient(90deg, var(--gold-hi), var(--gold) 45%, transparent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0;
+  pointer-events: none;
+  animation: tick-scan 0.95s cubic-bezier(0.65, 0, 0.25, 1) both;
+  animation-delay: calc(var(--d, 0ms) + 0.34s);
+}
+
+.hero-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  z-index: 5;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(232, 193, 90, 0.7) 28%,
+    rgba(246, 227, 161, 0.95) 50%,
+    rgba(232, 193, 90, 0.7) 72%,
+    transparent 100%
+  );
+  box-shadow: 0 0 18px rgba(227, 185, 92, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  animation: hero-scan 1.7s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+@keyframes decrypt-in {
+  0% {
+    opacity: 0;
+    transform: translateY(0.38em) scale(0.985);
+    filter: blur(12px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(2.5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes tick-scan {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  62% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+@keyframes hero-scan {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100svh);
     opacity: 0;
   }
 }
@@ -637,5 +745,10 @@
   .rblock {
     clip-path: none;
     transition: none;
+  }
+  .decrypt-word,
+  .decrypt-tick,
+  .hero-scan {
+    animation: none !important;
   }
 }

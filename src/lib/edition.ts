@@ -15,7 +15,7 @@ export const EDITION: Edition =
 export const TUNE = EDITION === "web"
   ? {
       edition: "web" as Edition,
-      chip: "TEST BUILD · V8 · WEB EDITION",
+      chip: "TEST BUILD · V9 · WEB EDITION",
       /* hero trail */
       heroBubbles: 20,
       heroTrailLen: 15,
@@ -38,7 +38,7 @@ export const TUNE = EDITION === "web"
     }
   : {
       edition: "mobile" as Edition,
-      chip: "TEST BUILD · V8 · MOBILE EDITION",
+      chip: "TEST BUILD · V9 · MOBILE EDITION",
       heroBubbles: 13,
       heroTrailLen: 11,
       heroTrailAlpha: 0.55, // brighter — small screens need it

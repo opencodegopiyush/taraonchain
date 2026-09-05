@@ -1,18 +1,26 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useStore, reviewedPct } from "@/lib/store";
 import { EDITION, TUNE } from "@/lib/edition";
 import HeroTrail from "./fx/HeroTrail";
 import Scramble from "./fx/Scramble";
 import GoldWord from "./fx/GoldWord";
-import { useInView, useCountUp, RedactBlock, RedactWord } from "./fx/Reveal";
+import { useInView, useCountUp } from "./fx/Reveal";
 
-/* ── v8 landing — minimal, one case, no method page ──────────
-   copy per user: eyebrow + headline + new intro paragraphs,
-   DRAG hint stays; METHOD removed entirely; stats live right
-   above the case card. every animation is css/canvas and
-   renders identically on phone and desktop. */
+/* ── v9 landing — the open animation rebuilt ─────────────────
+   user-directed changes from v8:
+   · HOW IT WORKS — removed from the page entirely
+   · OPEN CASE button (case + case number) — removed. the file
+     itself is the entry point: tap anywhere on the case card.
+   · stats — welded INTO the case file as its FOOTPRINT
+     (measured from case S-0830), no longer hanging loose on
+     the page. the numbers belong to SHARAV.
+   · redact-bar / clip-path reveal — gone from the landing.
+     new open sequence is pure CSS, time-based, cover-free:
+     words are never hidden by any overlay, they arrive via
+     blur→sharp decrypt + a gold scanner tick + a one-shot
+     scan sweep. if anything fails, text simply shows. */
 
 const TICKER = [
   "CASE S-0830 · SHARAV",
@@ -53,7 +61,10 @@ function Stat({ v, label, suffix }: { v: number; label: string; suffix?: string 
   const [ref, on] = useInView<HTMLDivElement>(0.5);
   const n = useCountUp(v, on, 900);
   return (
-    <div ref={ref} className="flex flex-col gap-1 px-2 py-4 text-center">
+    <div
+      ref={ref}
+      className="flex flex-col items-center gap-1 px-2 py-4 text-center transition-colors duration-200"
+    >
       <span className="disp text-2xl font-bold text-gold-hi sm:text-3xl">
         {n}
         {suffix}
@@ -63,82 +74,25 @@ function Stat({ v, label, suffix }: { v: number; label: string; suffix?: string 
   );
 }
 
-/* HOW IT WORKS — three steps, tap/hover lights them up.
-   pure buttons: works with a finger, no :hover dependency. */
-const STEPS = [
-  {
-    n: "01",
-    t: "OPEN THE CASE",
-    d: "Pull file S-0830. The whole archive ships inside the bundle — no server, no account, nothing leaves your device.",
-  },
-  {
-    n: "02",
-    t: "FOLLOW THE GOLD",
-    d: "Drag the field. Every gold bubble is an entity, every comet trail the direction the money moved. Tap one to interrogate it.",
-  },
-  {
-    n: "03",
-    t: "READ THE STAMPS",
-    d: "Every claim is graded — observed, assessed or unknown. Gold is the evidence stamp; trust it accordingly.",
-  },
-];
-
-function HowItWorks({
-  howRef,
-  howOn,
+/* v9 decrypt word — cover-free reveal. the word is always in
+   the DOM fully painted; the animation only carries it in
+   (blur + rise). the gold tick beneath is decoration that
+   draws then fades — it can never cover the word. */
+function DecryptWord({
+  children,
+  delay,
 }: {
-  howRef: React.RefObject<HTMLDivElement | null>;
-  howOn: boolean;
+  children: React.ReactNode;
+  delay: number;
 }) {
-  const [lit, setLit] = useState<number | null>(null);
   return (
-    <section className="relative px-5 py-14 sm:px-8 sm:py-20">
-      <div ref={howRef} className="mx-auto w-full max-w-3xl">
-        <p className="label mb-6">
-          <Scramble text="HOW IT WORKS — THREE MOVES" duration={650} />
-        </p>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {STEPS.map((s, i) => (
-            <div
-              key={s.n}
-              className={`fade-up ${howOn ? "" : "opacity-0"}`}
-              style={{ animationDelay: `${i * 130}ms` }}
-            >
-              <button
-                type="button"
-                onPointerEnter={() => setLit(i)}
-                onPointerLeave={() => setLit(null)}
-                onPointerDown={() => setLit(i)}
-                className={`panel t4-spring relative h-full w-full overflow-hidden p-4 text-left active:scale-[0.985] sm:p-5 ${
-                  lit === i ? "border-[rgba(227,185,92,0.5)]" : ""
-                }`}
-                style={
-                  lit === i
-                    ? { boxShadow: "0 0 26px rgba(227,185,92,0.14), inset 0 0 22px rgba(227,185,92,0.05)" }
-                    : undefined
-                }
-              >
-                <span
-                  className={`disp text-3xl font-bold t4-spring ${
-                    lit === i ? "text-gold-hi" : "text-[rgba(227,185,92,0.28)]"
-                  }`}
-                >
-                  {s.n}
-                </span>
-                <p className="label mt-3 mb-2" style={{ color: lit === i ? "var(--gold)" : undefined }}>
-                  {s.t}
-                </p>
-                <p className="text-[12.5px] leading-relaxed text-mute">{s.d}</p>
-                <span
-                  className={`absolute bottom-0 left-0 h-[2px] bg-[linear-gradient(90deg,var(--gold),transparent)] t4-spring`}
-                  style={{ width: lit === i ? "100%" : "18%" }}
-                />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+    <span
+      className="relative inline-block"
+      style={{ "--d": `${delay}ms` } as React.CSSProperties}
+    >
+      <span className="decrypt-word inline-block">{children}</span>
+      <span aria-hidden className="decrypt-tick" />
+    </span>
   );
 }
 
@@ -148,9 +102,7 @@ export default function Landing() {
   const visited = useStore((s) => s.visited);
   const pct = reviewedPct({ visited, caseFile: cf });
 
-  const [heroRef, heroOn] = useInView<HTMLDivElement>(0.15);
   const [cardRef, cardOn] = useInView<HTMLDivElement>(0.18);
-  const [howRef, howOn] = useInView<HTMLDivElement>(0.2);
 
   /* web edition: the case card tilts toward your cursor.
      transform-only (compositor-friendly), reset on leave. */
@@ -172,15 +124,7 @@ export default function Landing() {
       }
     : undefined;
 
-  const fire = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const rip = document.createElement("span");
-    rip.className = "ripple-ink";
-    rip.style.left = `${e.nativeEvent.offsetX}px`;
-    rip.style.top = `${e.nativeEvent.offsetY}px`;
-    (e.currentTarget as HTMLElement).appendChild(rip);
-    setTimeout(() => rip.remove(), 720);
-    openCase();
-  };
+  const openFile = () => openCase();
 
   return (
     <div className="relative min-h-[100svh] overflow-x-clip bg-background">
@@ -192,36 +136,34 @@ export default function Landing() {
         <span className="chip">{TUNE.chip}</span>
       </div>
 
-      {/* ── hero ── */}
-      <section
-        ref={heroRef}
-        className="scanlines relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-5 pb-16 pt-20 sm:px-8"
-      >
+      {/* ── hero — decrypt open ── */}
+      <section className="scanlines relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-5 pb-16 pt-20 sm:px-8">
         <HeroTrail className="absolute inset-0 h-full w-full" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(8,7,4,0.72)_100%)]" />
+        <span aria-hidden className="hero-scan" />
 
         <div className="relative z-10 mx-auto w-full max-w-3xl">
-          <p className="label mb-5 fade-up" style={{ animationDelay: "60ms" }}>
+          <p className="label mb-5 fade-up" style={{ animationDelay: "80ms" }}>
             <Scramble text="ON-CHAIN FORENSICS · CASE ARCHIVE" duration={650} />
           </p>
 
           <h1 className="disp font-bold leading-[0.98] tracking-tight text-ink">
             <span className="block text-[12vw] sm:text-6xl md:text-7xl">
-              <RedactWord active={heroOn} delay={200}>EVERY</RedactWord>{" "}
-              <RedactWord active={heroOn} delay={340}>CHAIN</RedactWord>
+              <DecryptWord delay={260}>EVERY</DecryptWord>{" "}
+              <DecryptWord delay={400}>CHAIN</DecryptWord>
             </span>
             <span className="block text-[12vw] sm:text-6xl md:text-7xl">
-              <RedactWord active={heroOn} delay={480}>LEAVES</RedactWord>{" "}
-              <RedactWord active={heroOn} delay={600}>A</RedactWord>
+              <DecryptWord delay={560}>LEAVES</DecryptWord>{" "}
+              <DecryptWord delay={680}>A</DecryptWord>
             </span>
             <span className="block text-[15vw] sm:text-7xl md:text-8xl">
-              <RedactWord active={heroOn} delay={760}>
+              <DecryptWord delay={860}>
                 <GoldWord>TRAIL.</GoldWord>
-              </RedactWord>
+              </DecryptWord>
             </span>
           </h1>
 
-          <RedactBlock active={heroOn} delay={880} className="mt-7 max-w-xl">
+          <div className="mt-7 max-w-xl fade-up" style={{ animationDelay: "1000ms" }}>
             <p className="read text-[15px] sm:text-base">
               The mempool forgets nothing. TARAONCHAIN conducts independent
               on-chain investigations tracing wallets, reconstructing movements
@@ -234,20 +176,11 @@ export default function Landing() {
               paths, and analytical reasoning behind each finding to be
               examined directly.
             </p>
-          </RedactBlock>
-
-          <div
-            className="mt-9 flex flex-wrap items-center gap-3 fade-up"
-            style={{ animationDelay: "1050ms" }}
-          >
-            <button className="btn btn-gold" onClick={fire}>
-              OPEN CASE {cf.id} ▸
-            </button>
           </div>
 
           <p
             className="label mt-10 fade-up caret"
-            style={{ animationDelay: "1320ms" }}
+            style={{ animationDelay: "1300ms" }}
           >
             DRAG THE BUBBLES — THEY ANSWER
           </p>
@@ -262,19 +195,7 @@ export default function Landing() {
       {/* ── data ticker ── */}
       <Ticker />
 
-      {/* ── how it works ── */}
-      <HowItWorks howRef={howRef} howOn={howOn} />
-
-      {/* ── stats + case card — the numbers lead into the file ── */}
-      <section className="hairline-t relative bg-[rgba(12,10,6,0.6)]">
-        <div className="mx-auto grid max-w-4xl grid-cols-2 divide-x divide-[var(--line)] sm:grid-cols-4">
-          <Stat v={cf.stats.entities} label="ENTITIES MAPPED" />
-          <Stat v={cf.stats.hops} label="LINKS TRACED" />
-          <Stat v={cf.chapters.length} label="CHAPTERS" />
-          <Stat v={100} label="TELEMETRY" suffix="% OFF" />
-        </div>
-      </section>
-
+      {/* ── the case file — stats live inside, welded to SHARAV ── */}
       <section className="relative px-5 py-14 sm:px-8 sm:py-20">
         <div ref={cardRef} className="mx-auto w-full max-w-3xl">
           <p className="label mb-4">
@@ -283,9 +204,19 @@ export default function Landing() {
 
           <div
             ref={tiltRef}
+            role="button"
+            tabIndex={0}
+            aria-label={`Open case file ${cf.id} — ${cf.codename}`}
+            onClick={openFile}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openFile();
+              }
+            }}
             onPointerMove={onCardMove}
             onPointerLeave={onCardLeave}
-            className={`panel glow-pulse t4-spring relative overflow-hidden p-5 fade-up sm:p-8 ${
+            className={`panel glow-pulse t4-spring relative cursor-pointer overflow-hidden p-5 fade-up sm:p-8 ${
               cardOn ? "" : "opacity-0"
             }`}
           >
@@ -309,15 +240,30 @@ export default function Landing() {
               </span>
             </div>
 
-            <RedactBlock active={cardOn} delay={220} className="mt-5">
-              <p className="read">{cf.summary}</p>
-            </RedactBlock>
+            <p className="read mt-5">{cf.summary}</p>
+
+            {/* footprint — the stats belong to this file, not the page */}
+            <div className="hairline-t mt-7 pt-5">
+              <p className="label mb-2 flex items-center gap-2">
+                <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold" />
+                FOOTPRINT · MEASURED FROM CASE {cf.id} — {cf.codename}
+              </p>
+              <div className="grid grid-cols-2 divide-x divide-[var(--line)] sm:grid-cols-4">
+                <Stat v={cf.stats.entities} label="ENTITIES MAPPED" />
+                <Stat v={cf.stats.hops} label="LINKS TRACED" />
+                <Stat v={cf.chapters.length} label="CHAPTERS" />
+                <Stat v={100} label="TELEMETRY" suffix="% OFF" />
+              </div>
+            </div>
 
             {/* declassify progress */}
             <div className="mt-6">
               <div className="mb-2 flex items-center justify-between">
                 <span className="label">DECLASSIFIED</span>
-                <span className="mono text-[11px] text-gold">{Math.max(pct, visited.length > 0 ? pct : 0)}%{pct === 0 ? " · UNOPENED" : " REVIEWED"}</span>
+                <span className="mono text-[11px] text-gold">
+                  {Math.max(pct, visited.length > 0 ? pct : 0)}%
+                  {pct === 0 ? " · UNOPENED" : " REVIEWED"}
+                </span>
               </div>
               <div className="h-[3px] w-full overflow-hidden bg-[rgba(232,193,90,0.12)]">
                 <div
@@ -327,9 +273,13 @@ export default function Landing() {
               </div>
             </div>
 
-            <button className="btn btn-gold mt-7 w-full sm:w-auto" onClick={fire}>
-              OPEN CASE FILE ▸
-            </button>
+            {/* the file is the button — no case-number button anymore */}
+            <div className="mt-6 flex items-center justify-between gap-3">
+              <span className="label">TAP ANYWHERE ON THE FILE TO OPEN</span>
+              <span className="mono shrink-0 text-[11px] font-bold tracking-[0.18em] text-gold">
+                OPEN FILE ▸
+              </span>
+            </div>
           </div>
         </div>
       </section>
@@ -341,15 +291,13 @@ export default function Landing() {
             ▣ ZERO TELEMETRY &nbsp;·&nbsp; ▣ LOCAL ARCHIVE &nbsp;·&nbsp; ▣
             NOTHING LEAVES THIS DEVICE
           </p>
-          <RedactBlock active={cardOn} delay={160} className="mt-5">
-            <p className="mx-auto max-w-xl text-[12.5px] leading-relaxed text-mute">
-              This build reads its case data from the bundle in front of you.
-              No account, no database round-trip, no analytics beacon — the
-              only network request is the one that fetched this page.
-            </p>
-          </RedactBlock>
+          <p className="mx-auto mt-5 max-w-xl text-[12.5px] leading-relaxed text-mute">
+            This build reads its case data from the bundle in front of you. No
+            account, no database round-trip, no analytics beacon — the only
+            network request is the one that fetched this page.
+          </p>
           <p className="label mt-10">
-            TARAONCHAIN TEST BUILD · V8 · {EDITION === "web" ? "WEB" : "MOBILE"} EDITION · {new Date().getFullYear()}
+            TARAONCHAIN TEST BUILD · V9 · {EDITION === "web" ? "WEB" : "MOBILE"} EDITION · {new Date().getFullYear()}
           </p>
         </div>
       </section>

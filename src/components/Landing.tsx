@@ -4,51 +4,18 @@ import { useRef } from "react";
 import { useStore, reviewedPct } from "@/lib/store";
 import { TUNE, useDevice } from "@/lib/edition";
 import HeroTrail from "./fx/HeroTrail";
+import EvidenceCloud from "./fx/EvidenceCloud";
 import Scramble from "./fx/Scramble";
 import GoldWord from "./fx/GoldWord";
 import { useInView, useCountUp } from "./fx/Reveal";
 
-/* ── v10 landing — single build, auto-tuned ─────────────
-   one binary for phone and desktop: the device is detected
-   on mount and the tuning table (bubbles, trails, speeds,
-   hover fx) is applied live. v9 changes all hold: no HOW IT
-   WORKS, no case-number button (the file itself opens),
-   stats welded into the case file, cover-free decrypt open. */
-
-const TICKER = [
-  "CASE S-0830 · SHARAV",
-  "SOLANA",
-  "TOKEN CREATED AUG 30 · 07:59:52 UTC",
-  "SLOT 442,828,340",
-  "PEAK MCAP $512,327",
-  "≈$25,150 EXTRACTED",
-  "−98.8% FROM PEAK",
-  "8 SIGNATURES ON EVIDENCE LOCK",
-  "ZERO TELEMETRY",
-];
-
-function Ticker() {
-  const row = [...TICKER, ...TICKER];
-  return (
-    <div className="hairline-t hairline-b relative overflow-hidden bg-[rgba(10,8,5,0.7)] py-2.5">
-      <div className="ticker flex w-max items-center gap-8 whitespace-nowrap">
-        {[0, 1].map((half) => (
-          <div key={half} className="flex items-center gap-8" aria-hidden={half === 1}>
-            {row.map((t, i) => (
-              <span
-                key={`${half}-${i}`}
-                className="mono flex items-center gap-8 text-[10px] tracking-[0.22em] text-faint"
-              >
-                {t}
-                <span className="text-[7px] text-gold">◆</span>
-              </span>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+/* ── v11 landing — ticker replaced by the evidence cloud ────
+   the scrolling data line is gone. in its place: the case id
+   S-0830 · SHARAV rebuilt from living gold particles that
+   assemble, scatter under your finger and spring back. all
+   v10 rules hold: single auto-tuned build, no HOW IT WORKS,
+   no case-number button, stats welded to the file, decrypt
+   open. */
 
 function Stat({ v, label, suffix }: { v: number; label: string; suffix?: string }) {
   const [ref, on] = useInView<HTMLDivElement>(0.5);
@@ -187,8 +154,22 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── data ticker ── */}
-      <Ticker />
+      {/* ── evidence cloud — the case id, alive ── */}
+      <section className="hairline-t hairline-b relative h-[190px] overflow-hidden bg-[rgba(10,8,5,0.7)] sm:h-[240px]">
+        <EvidenceCloud className="absolute inset-0 h-full w-full" />
+        <span className="mono pointer-events-none absolute inset-x-0 bottom-[16%] z-10 text-center text-[11px] font-bold tracking-[0.5em] text-gold/85">
+          SHARAV
+        </span>
+        <span className="label pointer-events-none absolute left-5 top-3 z-10 sm:hidden">
+          EVIDENCE CLOUD
+        </span>
+        <span className="label pointer-events-none absolute left-5 top-3 z-10 hidden sm:block">
+          EVIDENCE CLOUD — CASE S-0830
+        </span>
+        <span className="label pointer-events-none absolute right-5 top-3 z-10 text-gold">
+          TOUCH IT — IT SCATTERS
+        </span>
+      </section>
 
       {/* ── the case file — stats live inside, welded to SHARAV ── */}
       <section className="relative px-5 py-14 sm:px-8 sm:py-20">

@@ -32,10 +32,14 @@ export type Tune = {
   /* motion */
   speed: number;
   hoverFx: boolean;
+  /* evidence cloud band (v11) */
+  cloudParticles: number;
+  cloudPushRadius: number;
+  cloudPushForce: number;
 };
 
 const DESKTOP_TUNE: Tune = {
-  chip: "TEST BUILD · V10 · AUTO-TUNED",
+  chip: "TEST BUILD · V11 · AUTO-TUNED",
   /* hero trail */
   heroBubbles: 20,
   heroTrailLen: 15,
@@ -54,10 +58,14 @@ const DESKTOP_TUNE: Tune = {
   driftSpeed: 1.3,
   speed: 1.0,
   hoverFx: true,
+  /* evidence cloud */
+  cloudParticles: 1300,
+  cloudPushRadius: 150,
+  cloudPushForce: 0.55,
 };
 
 const MOBILE_TUNE: Tune = {
-  chip: "TEST BUILD · V10 · AUTO-TUNED",
+  chip: "TEST BUILD · V11 · AUTO-TUNED",
   heroBubbles: 13,
   heroTrailLen: 11,
   heroTrailAlpha: 0.55, // brighter — small screens need it
@@ -73,6 +81,10 @@ const MOBILE_TUNE: Tune = {
   driftSpeed: 1.0,
   speed: 0.85, // faster-feeling reveals on small screens
   hoverFx: false,
+  /* evidence cloud */
+  cloudParticles: 720,
+  cloudPushRadius: 140,
+  cloudPushForce: 0.85, // finger scatter feels stronger
 };
 
 /* live tuning — mutated IN PLACE by retune() so per-frame

@@ -285,7 +285,7 @@ export default function Landing() {
             network request is the one that fetched this page.
           </p>
           <p className="label mt-10">
-            TARAONCHAIN TEST BUILD · V13.1 · SINGLE BUILD · {new Date().getFullYear()}
+            TARAONCHAIN · V14 · SINGLE BUILD · {new Date().getFullYear()}
           </p>
         </div>
       </section>

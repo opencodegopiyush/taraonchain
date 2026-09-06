@@ -103,6 +103,11 @@ export default function TraceCanvas() {
           phi: s.camCmd.phi,
         };
         if (!anim.cam) anim.cam = { ...anim.goal };
+        /* v14 fix: a chapter switch IS an interaction. without this,
+           the idle orbit's goal.theta = cam.theta ratchet swallowed the
+           authored chapter theta before the ease could reach it —
+           chapter cameras only ever worked for users mid-drag. */
+        anim.lastInteract = performance.now();
       }
       if (s.chapter !== undefined) {
         anim.focusSet = chapterFocusSet(cf, s.chapter);

@@ -39,7 +39,7 @@ export type Tune = {
 };
 
 const DESKTOP_TUNE: Tune = {
-  chip: "TEST BUILD · V13.1 · AUTO-TUNED",
+  chip: "V14 · AUTO-TUNED",
   /* hero trail */
   heroBubbles: 20,
   heroTrailLen: 15,
@@ -65,7 +65,7 @@ const DESKTOP_TUNE: Tune = {
 };
 
 const MOBILE_TUNE: Tune = {
-  chip: "TEST BUILD · V13.1 · AUTO-TUNED",
+  chip: "V14 · AUTO-TUNED",
   heroBubbles: 13,
   heroTrailLen: 11,
   heroTrailAlpha: 0.55, // brighter — small screens need it

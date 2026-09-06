@@ -8,6 +8,7 @@ import Overlays from "@/components/desk/Overlays";
 
 export default function Page() {
   const view = useStore((s) => s.view);
+  const caseId = useStore((s) => s.caseFile.id);
   const rehydrate = useStore((s) => s.rehydrate);
 
   useEffect(() => {
@@ -16,7 +17,11 @@ export default function Page() {
 
   return (
     <main className="bg-background text-foreground">
-      {view === "landing" ? <Landing key="landing" /> : <CaseDesk key="desk" />}
+      {view === "landing" ? (
+        <Landing key="landing" />
+      ) : (
+        <CaseDesk key={`desk-${caseId}`} />
+      )}
       <Overlays />
     </main>
   );

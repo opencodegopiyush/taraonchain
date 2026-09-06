@@ -2,6 +2,8 @@
 
 import { useRef } from "react";
 import { useStore, reviewedPct } from "@/lib/store";
+import { CASES } from "@/lib/case-data";
+import type { CaseFile } from "@/lib/types";
 import { TUNE, useDevice } from "@/lib/edition";
 import HeroTrail from "./fx/HeroTrail";
 import EvidenceCloud from "./fx/EvidenceCloud";
@@ -59,14 +61,22 @@ function DecryptWord({
   );
 }
 
-export default function Landing() {
+/* v13 — per-case card chrome: archive kicker + the one drawdown line.
+   both lines are report facts, keyed by case id. */
+const CARD_META: Record<string, { kicker: string; drawdown: string }> = {
+  "R-0905": { kicker: "LATEST DECLASSIFICATION", drawdown: "−99.3% FROM PEAK" },
+  "S-0830": { kicker: "PREVIOUSLY DECLASSIFIED", drawdown: "−98.8% FROM PEAK" },
+};
+
+/* the case file card — the WHOLE CARD is the button (v9 rule).
+   stats live inside, welded to that case's own footprint. */
+function CaseCard({ cf, second }: { cf: CaseFile; second?: boolean }) {
   const openCase = useStore((s) => s.openCase);
-  const cf = useStore((s) => s.caseFile);
   const visited = useStore((s) => s.visited);
   const pct = reviewedPct({ visited, caseFile: cf });
+  const meta = CARD_META[cf.id] ?? { kicker: "DECLASSIFIED FILE", drawdown: "" };
 
   const [cardRef, cardOn] = useInView<HTMLDivElement>(0.18);
-
   const device = useDevice();
 
   /* desktop: the case card tilts toward your cursor.
@@ -89,8 +99,98 @@ export default function Landing() {
       }
     : undefined;
 
-  const openFile = () => openCase();
+  const openFile = () => openCase(cf.id);
 
+  return (
+    <div ref={cardRef} className={second ? "mt-14 sm:mt-16" : undefined}>
+      <p className="label mb-4">
+        <Scramble text={meta.kicker} duration={650} />
+      </p>
+
+      <div
+        ref={tiltRef}
+        role="button"
+        tabIndex={0}
+        aria-label={`Open case file ${cf.id} — ${cf.codename}`}
+        onClick={openFile}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openFile();
+          }
+        }}
+        onPointerMove={onCardMove}
+        onPointerLeave={onCardLeave}
+        className={`panel glow-pulse t4-spring relative cursor-pointer overflow-hidden p-5 fade-up sm:p-8 ${
+          cardOn ? "" : "opacity-0"
+        }`}
+      >
+        {/* stamp */}
+        <div className="absolute right-4 top-4 sm:right-7 sm:top-7">
+          {cardOn && <span className="stamp stamp-in">{cf.status}</span>}
+        </div>
+
+        <p className="label mb-2">
+          CASE {cf.id} · {cf.chains.join(" / ")} · {cf.span}
+        </p>
+        <h2 className="disp text-4xl font-bold tracking-tight text-gold-hi sm:text-6xl">
+          {cf.codename}
+        </h2>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="chip">{cf.amountLabel ?? cf.amountUsd}</span>
+          <span className="chip">{cf.amountUsd}</span>
+          <span className="chip" style={{ color: "var(--ember)" }}>
+            {meta.drawdown}
+          </span>
+        </div>
+
+        <p className="read mt-5">{cf.summary}</p>
+
+        {/* footprint — the stats belong to this file, not the page */}
+        <div className="hairline-t mt-7 pt-5">
+          <p className="label mb-2 flex items-center gap-2">
+            <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold" />
+            FOOTPRINT · MEASURED FROM CASE {cf.id} — {cf.codename}
+          </p>
+          <div className="grid grid-cols-2 divide-x divide-[var(--line)] sm:grid-cols-4">
+            <Stat v={cf.stats.entities} label="ENTITIES MAPPED" />
+            <Stat v={cf.stats.hops} label="LINKS TRACED" />
+            <Stat v={cf.chapters.length} label="CHAPTERS" />
+            <Stat v={100} label="TELEMETRY" suffix="% OFF" />
+          </div>
+        </div>
+
+        {/* declassify progress */}
+        <div className="mt-6">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="label">DECLASSIFIED</span>
+            <span className="mono text-[11px] text-gold">
+              {Math.max(pct, visited.length > 0 ? pct : 0)}%
+              {pct === 0 ? " · UNOPENED" : " REVIEWED"}
+            </span>
+          </div>
+          <div className="h-[3px] w-full overflow-hidden bg-[rgba(232,193,90,0.12)]">
+            <div
+              className="declassify-bar h-full bg-[linear-gradient(90deg,var(--gold-dim),var(--gold-hi))] transition-all duration-1000"
+              style={{ width: `${Math.max(pct, 8)}%` }}
+            />
+          </div>
+        </div>
+
+        {/* the file is the button — no case-number button anymore */}
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <span className="label">TAP ANYWHERE ON THE FILE TO OPEN</span>
+          <span className="mono shrink-0 text-[11px] font-bold tracking-[0.18em] text-gold">
+            OPEN FILE ▸
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Landing() {
   return (
     <div className="relative min-h-[100svh] overflow-x-clip bg-background">
       {/* corner chrome */}
@@ -163,92 +263,12 @@ export default function Landing() {
         <span className="sr-only">TARAONCHAIN</span>
       </section>
 
-      {/* ── the case file — stats live inside, welded to SHARAV ── */}
+      {/* ── the archive — every published investigation, newest first ── */}
       <section className="relative px-5 py-14 sm:px-8 sm:py-20">
-        <div ref={cardRef} className="mx-auto w-full max-w-3xl">
-          <p className="label mb-4">
-            <Scramble text="LATEST DECLASSIFICATION" duration={650} />
-          </p>
-
-          <div
-            ref={tiltRef}
-            role="button"
-            tabIndex={0}
-            aria-label={`Open case file ${cf.id} — ${cf.codename}`}
-            onClick={openFile}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                openFile();
-              }
-            }}
-            onPointerMove={onCardMove}
-            onPointerLeave={onCardLeave}
-            className={`panel glow-pulse t4-spring relative cursor-pointer overflow-hidden p-5 fade-up sm:p-8 ${
-              cardOn ? "" : "opacity-0"
-            }`}
-          >
-            {/* stamp */}
-            <div className="absolute right-4 top-4 sm:right-7 sm:top-7">
-              {cardOn && <span className="stamp stamp-in">{cf.status}</span>}
-            </div>
-
-            <p className="label mb-2">
-              CASE {cf.id} · {cf.chains.join(" / ")} · {cf.span}
-            </p>
-            <h2 className="disp text-4xl font-bold tracking-tight text-gold-hi sm:text-6xl">
-              {cf.codename}
-            </h2>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="chip">≈$25,150 EXTRACTED</span>
-              <span className="chip">$512K PEAK MCAP</span>
-              <span className="chip" style={{ color: "var(--ember)" }}>
-                −98.8% FROM PEAK
-              </span>
-            </div>
-
-            <p className="read mt-5">{cf.summary}</p>
-
-            {/* footprint — the stats belong to this file, not the page */}
-            <div className="hairline-t mt-7 pt-5">
-              <p className="label mb-2 flex items-center gap-2">
-                <span className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-gold" />
-                FOOTPRINT · MEASURED FROM CASE {cf.id} — {cf.codename}
-              </p>
-              <div className="grid grid-cols-2 divide-x divide-[var(--line)] sm:grid-cols-4">
-                <Stat v={cf.stats.entities} label="ENTITIES MAPPED" />
-                <Stat v={cf.stats.hops} label="LINKS TRACED" />
-                <Stat v={cf.chapters.length} label="CHAPTERS" />
-                <Stat v={100} label="TELEMETRY" suffix="% OFF" />
-              </div>
-            </div>
-
-            {/* declassify progress */}
-            <div className="mt-6">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="label">DECLASSIFIED</span>
-                <span className="mono text-[11px] text-gold">
-                  {Math.max(pct, visited.length > 0 ? pct : 0)}%
-                  {pct === 0 ? " · UNOPENED" : " REVIEWED"}
-                </span>
-              </div>
-              <div className="h-[3px] w-full overflow-hidden bg-[rgba(232,193,90,0.12)]">
-                <div
-                  className="declassify-bar h-full bg-[linear-gradient(90deg,var(--gold-dim),var(--gold-hi))] transition-all duration-1000"
-                  style={{ width: `${Math.max(pct, 8)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* the file is the button — no case-number button anymore */}
-            <div className="mt-6 flex items-center justify-between gap-3">
-              <span className="label">TAP ANYWHERE ON THE FILE TO OPEN</span>
-              <span className="mono shrink-0 text-[11px] font-bold tracking-[0.18em] text-gold">
-                OPEN FILE ▸
-              </span>
-            </div>
-          </div>
+        <div className="mx-auto w-full max-w-3xl">
+          {CASES.map((c, i) => (
+            <CaseCard key={c.id} cf={c} second={i > 0} />
+          ))}
         </div>
       </section>
 
@@ -265,7 +285,7 @@ export default function Landing() {
             network request is the one that fetched this page.
           </p>
           <p className="label mt-10">
-            TARAONCHAIN TEST BUILD · V12 · SINGLE BUILD · {new Date().getFullYear()}
+            TARAONCHAIN TEST BUILD · V13 · SINGLE BUILD · {new Date().getFullYear()}
           </p>
         </div>
       </section>

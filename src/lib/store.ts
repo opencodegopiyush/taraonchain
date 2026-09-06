@@ -2,11 +2,13 @@
 
 import { create } from "zustand";
 import type { CaseFile } from "./types";
-import { CASE } from "./case-data";
+import { CASES, getCaseById } from "./case-data";
 
-/* ── v6 store — lean single-case state ───────────────────────
+/* ── v13 store — multi-case state ────────────────────────────
    the trace engine subscribes imperatively to camCmd and
-   selectedNodeId; nothing re-renders per frame. */
+   selectedNodeId; nothing re-renders per frame. the desk
+   subtree is keyed by case id (page.tsx) so switching cases
+   remounts the engine cleanly. */
 
 export type View = "landing" | "desk";
 export type OverlayName = "report" | null; // v8: METHOD page removed
@@ -42,7 +44,7 @@ interface V6State {
   camCmd: CamCmd | null;
   caseFile: CaseFile;
 
-  openCase: () => void;
+  openCase: (id: string) => void;
   home: () => void;
   setChapter: (i: number) => void;
   nextChapter: () => void;
@@ -75,11 +77,12 @@ export const useStore = create<V6State>((set, get) => {
     paused: false,
     visited: [],
     camCmd: null,
-    caseFile: CASE,
+    caseFile: CASES[0],
 
-    openCase: () => {
-      const c = camOf(get().caseFile, 0);
-      set({ view: "desk", chapter: 0, selectedNodeId: null, overlay: null, camCmd: cam(c.target, c.radius, c.theta, c.phi) });
+    openCase: (id) => {
+      const cf = getCaseById(id) ?? get().caseFile;
+      const c = camOf(cf, 0);
+      set({ caseFile: cf, view: "desk", chapter: 0, selectedNodeId: null, overlay: null, camCmd: cam(c.target, c.radius, c.theta, c.phi) });
       mark(0);
     },
 

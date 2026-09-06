@@ -39,7 +39,7 @@ export type Tune = {
 };
 
 const DESKTOP_TUNE: Tune = {
-  chip: "TEST BUILD · V12 · AUTO-TUNED",
+  chip: "TEST BUILD · V13 · AUTO-TUNED",
   /* hero trail */
   heroBubbles: 20,
   heroTrailLen: 15,
@@ -59,13 +59,13 @@ const DESKTOP_TUNE: Tune = {
   speed: 1.0,
   hoverFx: true,
   /* evidence cloud */
-  cloudParticles: 1800,
+  cloudParticles: 2400,
   cloudPushRadius: 150,
   cloudPushForce: 0.55,
 };
 
 const MOBILE_TUNE: Tune = {
-  chip: "TEST BUILD · V12 · AUTO-TUNED",
+  chip: "TEST BUILD · V13 · AUTO-TUNED",
   heroBubbles: 13,
   heroTrailLen: 11,
   heroTrailAlpha: 0.55, // brighter — small screens need it
@@ -82,7 +82,7 @@ const MOBILE_TUNE: Tune = {
   speed: 0.85, // faster-feeling reveals on small screens
   hoverFx: false,
   /* evidence cloud */
-  cloudParticles: 1000,
+  cloudParticles: 1400,
   cloudPushRadius: 140,
   cloudPushForce: 0.85, // finger scatter feels stronger
 };

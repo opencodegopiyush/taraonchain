@@ -192,7 +192,7 @@ export default function EvidenceCloud({
       ctx.clearRect(0, 0, w, h);
       ctx.globalCompositeOperation = "lighter";
       for (const p of parts) {
-        ctx.fillStyle = `rgba(${GOLD}, 0.55)`;
+        ctx.fillStyle = `rgba(${GOLD}, 0.75)`;
         ctx.beginPath();
         ctx.arc(p.hx, p.hy, 1.1, 0, 6.2832);
         ctx.fill();
@@ -221,7 +221,7 @@ export default function EvidenceCloud({
       const damp = Math.exp(-DAMP * dt);
       const spring = SPRING * dt;
       const dragBoost = ptr.down ? 2.4 : 1;
-      const psize = w > 700 ? 1.3 : 1.05; // longer word = sparser field, slightly fatter dots
+      const psize = w > 700 ? 1.5 : 1.2; // v13: brighter word — fatter dots
 
       for (let i = 0; i < parts.length; i++) {
         const p = parts[i];
@@ -260,7 +260,7 @@ export default function EvidenceCloud({
         if (sd < 70) p.glow = Math.max(p.glow, 1 - sd / 70);
         p.glow *= Math.exp(-2.1 * dt);
 
-        const a = 0.22 + 0.42 * (0.5 + 0.5 * zt) + p.glow * 0.36;
+        const a = 0.3 + 0.5 * (0.5 + 0.5 * zt) + p.glow * 0.45;
         const r = Math.max(
           0.6,
           (1.05 + 0.55 * zt) * psize * (1 + p.glow * 0.7),
@@ -274,7 +274,7 @@ export default function EvidenceCloud({
         ctx.fill();
 
         if (p.glow > 0.06) {
-          ctx.fillStyle = `rgba(${HI}, ${(p.glow * 0.3).toFixed(3)})`;
+          ctx.fillStyle = `rgba(${HI}, ${(p.glow * 0.38).toFixed(3)})`;
           ctx.beginPath();
           ctx.arc(x, y, r * 2.6, 0, 6.2832);
           ctx.fill();

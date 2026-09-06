@@ -1,20 +1,31 @@
 import type { CaseFile } from "./types";
 import { buildSharavDossier } from "./sharav-draft";
+import { buildSlinkDossier } from "./slink-draft";
 import { dossierToCaseFile } from "./case-from-dossier";
 
-/* ── the live case file ────────────────────────────────────────
-   CASE is the LIVE case — reassigned by setActiveCase() when a
-   published investigation is opened. three/* reads it through
-   module live bindings; the graph subtree remounts on change.
+/* ── the live case files ───────────────────────────────────────
+   v13: the archive carries MULTIPLE published investigations.
+   CASES[0] is the newest declassification (SLINK), CASES[1] the
+   previous one (SHARAV). CASE remains the live singleton read
+   through module live bindings by three/* — the desk subtree
+   remounts per case via the store (page.tsx keys CaseDesk by
+   case id), so swapping caseFile is always a clean mount.
 
-   the initial case is the bundled SHARAV investigation, compiled
-   from the real on-chain report. the demo-era fictional case and
-   its hand-built graph were removed from the bundle entirely —
-   the archive contains only real, published investigations. */
+   every case here is a real, published investigation compiled
+   from its on-chain report. no fictional entries. */
 
-export let CASE: CaseFile = dossierToCaseFile(buildSharavDossier());
+export const CASES: CaseFile[] = [
+  dossierToCaseFile(buildSlinkDossier()), // R-0905 · SLINK — latest
+  dossierToCaseFile(buildSharavDossier()), // S-0830 · SHARAV
+];
 
-/* swap the live case — the graph subtree remounts via store caseVersion */
+export let CASE: CaseFile = CASES[0];
+
+/* swap the live case singleton (kept for compatibility) */
 export function setActiveCase(cf: CaseFile) {
   CASE = cf;
+}
+
+export function getCaseById(id: string): CaseFile | undefined {
+  return CASES.find((c) => c.id === id.toUpperCase());
 }

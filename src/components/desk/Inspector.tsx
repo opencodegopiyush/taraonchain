@@ -75,6 +75,8 @@ function Card({
   close: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("overview");
+  /* per-case unit — never hardcode a chain: SLINK is ETH, SHARAV is SOL */
+  const unit = cf.unit ?? "ETH";
   const [dragY, setDragY] = useState<number | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const startY = useRef(0);
@@ -228,9 +230,9 @@ function Card({
           <Overview node={node} copy={copy} copied={copied} copyFail={copyFail} />
         )}
         {tab === "links" && (
-          <Links conns={conns} copy={copy} copied={copied} />
+          <Links conns={conns} unit={unit} />
         )}
-        {tab === "txns" && <Txns txs={txs} copy={copy} copied={copied} copyFail={copyFail} />}
+        {tab === "txns" && <Txns txs={txs} unit={unit} copy={copy} copied={copied} copyFail={copyFail} />}
       </div>
     </aside>
   );
@@ -333,10 +335,10 @@ function Overview({
 
 function Links({
   conns,
+  unit,
 }: {
   conns: { e: CaseEdge; other?: CaseNode; dir: "in" | "out" }[];
-  copy: (t: string, tag: string) => void;
-  copied: string | null;
+  unit: string;
 }) {
   const selectNode = useStore((s) => s.selectNode);
   if (conns.length === 0)
@@ -362,7 +364,7 @@ function Links({
             <span className="label">{KIND_LABEL[other!.kind]} · {EPI_LABEL[e.epistemic]}</span>
           </span>
           <span className="mono shrink-0 text-[11px] tabular-nums text-mute">
-            {e.valueLabel ?? `${fmtEth(e.value)} SOL`}
+            {e.valueLabel ?? `${fmtEth(e.value)} ${unit}`}
           </span>
         </button>
       ))}
@@ -372,11 +374,13 @@ function Links({
 
 function Txns({
   txs,
+  unit,
   copy,
   copied,
   copyFail,
 }: {
   txs: { hash: string; ts: string; value: number; chain: string; kind: string; via: string }[];
+  unit: string;
   copy: (t: string, tag: string) => void;
   copied: string | null;
   copyFail: string | null;
@@ -411,7 +415,7 @@ function Txns({
           </div>
           <div className="mt-1 flex items-center justify-between">
             <span className="mono text-[10.5px] text-gold">
-              {fmtEth(t.value)} SOL → {t.via}
+              {fmtEth(t.value)} {unit} → {t.via}
             </span>
             <span className="label">{t.ts}</span>
           </div>

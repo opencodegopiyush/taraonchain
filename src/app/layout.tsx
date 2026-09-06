@@ -7,9 +7,9 @@ import "@fontsource-variable/source-serif-4";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TARAONCHAIN — REDACTED · single build",
+  title: "TARAONCHAIN — ON-CHAIN FORENSICS · CASE ARCHIVE",
   description:
-    "Privacy-first on-chain investigation archive. Case S-0830 SHARAV, declassified: every entity, trail and figure from the verified report, walkable in your browser. Local archive, zero telemetry.",
+    "Privacy-first on-chain investigation archive. Independent case files — SLINK (R-0905) and SHARAV (S-0830) — every entity, funding trail and figure from the verified reports, walkable as interactive evidence graphs in your browser. Local archive, zero telemetry.",
 };
 
 export const viewport: Viewport = {

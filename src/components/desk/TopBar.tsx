@@ -25,7 +25,7 @@ export default function TopBar() {
         className="mono shrink-0 text-[10px] font-semibold tracking-[0.16em] text-ink transition-colors hover:text-signal sm:text-[11px] sm:tracking-[0.28em]"
         title="Back to the index"
       >
-        ← TARAONCHAIN
+        ← taraonchain
       </button>
       <span className="hidden text-faint sm:inline">│</span>
       <span className="mono shrink-0 text-[11px] tracking-[0.14em] text-mute">

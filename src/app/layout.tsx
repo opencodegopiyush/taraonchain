@@ -7,7 +7,7 @@ import "@fontsource/ibm-plex-mono/600.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TARAONCHAIN — ON-CHAIN FORENSICS · CASE ARCHIVE",
+  title: "taraonchain",
   description:
     "Privacy-first on-chain investigation archive. Independent case files — SLINK (R-0905) and SHARAV (S-0830) — every entity, funding trail and figure from the verified reports, walkable as interactive evidence graphs in your browser. Local archive, zero telemetry.",
 };

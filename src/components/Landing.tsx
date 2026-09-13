@@ -177,11 +177,11 @@ export default function Landing() {
       {/* ── top chrome — the room's signage ── */}
       <header className="hairline-b z-30 flex h-12 shrink-0 items-center justify-between gap-3 bg-[var(--paper)] px-4 sm:px-8">
         <div className="flex min-w-0 items-baseline gap-5">
-          <span className="mono shrink-0 text-[11px] font-semibold tracking-[0.3em] text-ink">
-            TARAONCHAIN<span className="text-signal">®</span>
+          <span className="mono shrink-0 text-[12px] font-semibold lowercase tracking-[0.22em] text-ink">
+            taraonchain<span className="text-signal">.</span>
           </span>
           <span className="label hidden truncate md:inline">
-            CASE ARCHIVE · ON-CHAIN FORENSICS · THE READING ROOM
+            CASE ARCHIVE · ON-CHAIN FORENSICS
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-3">
@@ -306,7 +306,7 @@ export default function Landing() {
           THE ONLY NETWORK REQUEST IS THE ONE THAT FETCHED THIS PAGE
         </p>
         <p className="mono text-[8.5px] tracking-[0.2em] text-mute">
-          TARAONCHAIN · {new Date().getFullYear()}
+          taraonchain · {new Date().getFullYear()}
         </p>
       </footer>
     </div>

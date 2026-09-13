@@ -96,7 +96,7 @@ export default function TraceCanvas() {
        and the box containment keeps every relevant bubble inside. */
     function safeBox() {
       const top = anim.coarse ? 64 : 46; // fig caption (two lines on touch)
-      const bottom = 40; // the chapter ruler strip
+      const bottom = 54; // the chapter ruler strip + label clearance
       const side = 12;
       const bw = Math.max(60, anim.w - side * 2);
       const bh = Math.max(60, anim.h - top - bottom);
@@ -127,7 +127,7 @@ export default function TraceCanvas() {
       const establishing = st.chapter === 0;
       const focus = chapterFocusSet(cf, st.chapter);
       const box = safeBox();
-      const pad = 10;
+      const pad = 12;
 
       const overAt = (r: number): number => {
         const g: Cam = {
@@ -150,7 +150,7 @@ export default function TraceCanvas() {
           if (p.x - pr < minX) minX = p.x - pr;
           if (p.x + pr > maxX) maxX = p.x + pr;
           if (p.y - pr < minY) minY = p.y - pr;
-          if (p.y + pr + 15 > maxY) maxY = p.y + pr + 15; // + label strip
+          if (p.y + pr + 22 > maxY) maxY = p.y + pr + 22; // + label strip
         }
         if (seen === 0) return 0;
         return Math.max(

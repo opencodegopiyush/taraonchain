@@ -23,8 +23,12 @@ import { TUNE } from "@/lib/edition";
    the only motion: one transform on the track, staggered CSS
    entrances, one stamp slam. */
 
-/* per-file chrome — stamp + drawdown are report facts */
-const FILE_META: Record<string, { stamp: string; fill?: boolean; drawdown: string }> = {
+/* per-file chrome — stamp, signal line and stat label are report facts */
+const FILE_META: Record<
+  string,
+  { stamp: string; fill?: boolean; drawdown: string; peakLabel?: string }
+> = {
+  "B-0913": { stamp: "MONITORING", drawdown: "2.37× GOAL IN 41.5 HOURS", peakLabel: "RAISED" },
   "R-0905": { stamp: "CLOSED", fill: true, drawdown: "−99.3% FROM PEAK" },
   "S-0830": { stamp: "ARCHIVED", drawdown: "−98.8% FROM PEAK" },
 };
@@ -92,16 +96,16 @@ function FilePlate({ cf, no, total }: { cf: CaseFile; no: number; total: number 
             [cf.stats.hops, "LINKS"],
             [cf.chapters.length, "CHAPTERS"],
             [cf.unit ?? "ETH", "UNIT"],
-            [cf.amountUsd, "PEAK"],
+            [cf.amountUsd, meta.peakLabel ?? "PEAK"],
           ] as [string | number, string][]
         ).map(([v, l]) => (
           <div
             key={l}
-            className={`bg-[var(--paper)] px-3.5 py-3 ${l === "PEAK" ? "col-span-2 sm:col-span-1" : ""}`}
+            className={`bg-[var(--paper)] px-3.5 py-3 ${l === (meta.peakLabel ?? "PEAK") ? "col-span-2 sm:col-span-1" : ""}`}
           >
             <p
               className={`mono text-[15px] font-semibold tabular-nums ${
-                l === "PEAK" ? "text-signal" : "text-ink"
+                l === (meta.peakLabel ?? "PEAK") ? "text-signal" : "text-ink"
               }`}
             >
               {v}

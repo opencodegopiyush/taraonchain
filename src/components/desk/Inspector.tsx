@@ -257,7 +257,7 @@ function Record({ node, cf, swapHint }: { node: CaseNode; cf: CaseFileT; swapHin
       {/* body */}
       <div className="slim-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(20px+env(safe-area-inset-bottom))] pt-4 lg:pb-4">
         {tab === "overview" && (
-          <Overview node={node} copy={copy} copied={copied} copyFail={copyFail} />
+          <Overview node={node} cf={cf} copy={copy} copied={copied} copyFail={copyFail} />
         )}
         {tab === "links" && <Links conns={conns} unit={unit} />}
         {tab === "txns" && (
@@ -273,16 +273,20 @@ type CaseFileT = ReturnType<typeof useStore.getState>["caseFile"];
 
 function Overview({
   node,
+  cf,
   copy,
   copied,
   copyFail,
 }: {
   node: CaseNode;
+  cf: CaseFileT;
   copy: (t: string, tag: string) => void;
   copied: string | null;
   copyFail: string | null;
 }) {
-  const unit = node.chain.includes("SOLANA") ? "SOL" : "";
+  /* per-case unit — multi-token cases (B-0913) carry cf.unit ("USD");
+     single-chain cases keep the native symbol (SHARAV → SOL) */
+  const unit = cf?.unit ?? (node.chain.includes("SOLANA") ? "SOL" : "");
   return (
     <div className="space-y-4">
       <button

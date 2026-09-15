@@ -164,7 +164,7 @@ export function dossierToCaseFile(d: DossierFile): CaseFile {
     amountEth: 0,
     amountUsd: d.amountUsd,
     amountLabel: d.amountText === "—" ? undefined : d.amountText,
-    unit: d.chains.some((c) => c.includes("SOLANA")) ? "SOL" : undefined,
+    unit: d.unit ?? (d.chains.some((c) => c.includes("SOLANA")) ? "SOL" : undefined),
     span: d.span,
     updated: d.updated,
     stats: {

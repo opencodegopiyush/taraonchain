@@ -181,6 +181,9 @@ export interface DossierFile {
   chains: string[];
   amountText: string;
   amountUsd: string;
+  /* optional display unit override — multi-token / dollarized cases set
+     this explicitly (B-0913 is USD); otherwise derived from chains */
+  unit?: string;
   span: string;
   updated: string;
   progress: number;

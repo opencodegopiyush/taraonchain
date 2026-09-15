@@ -67,6 +67,8 @@ export interface DraftCase {
   nextSteps: string; // one per line
   sourceNote?: string;
   assetRows?: { loc: string; amt: string; state: string; tone: "fact" | "assess" | "risk" | "unknown" }[];
+  /* optional display unit override (e.g. "USD" for dollarized cases) */
+  unit?: string;
   entities: DraftEntity[];
   connections: DraftConnection[];
   chapters: DraftChapter[];
@@ -148,12 +150,14 @@ export function normalizeDraft(raw: unknown): DraftCase {
     };
   };
   const rows = Array.isArray(r.assetRows)
-    ? r.assetRows
+    ? (r.assetRows
         .map((v) => {
           const a = (typeof v === "object" && v !== null ? v : {}) as Record<string, unknown>;
           return { loc: str(a.loc), amt: str(a.amt), state: str(a.state), tone: str(a.tone) };
         })
-        .filter((a) => a.loc && a.amt && ["fact", "assess", "risk", "unknown"].includes(a.tone))
+        .filter((a) => a.loc && a.amt && ["fact", "assess", "risk", "unknown"].includes(a.tone)) as {
+          loc: string; amt: string; state: string; tone: "fact" | "assess" | "risk" | "unknown";
+        }[])
     : undefined;
 
   return {
@@ -173,6 +177,7 @@ export function normalizeDraft(raw: unknown): DraftCase {
     nextSteps: str(r.nextSteps),
     sourceNote: str(r.sourceNote) || undefined,
     assetRows: rows && rows.length > 0 ? rows : undefined,
+    unit: str(r.unit) || undefined,
     graph: (r.graph ?? undefined) as DraftCase["graph"],
     entities: list(r.entities).map(ent),
     connections: list(r.connections).map(con),
@@ -362,6 +367,7 @@ export function buildDossier(d: DraftCase): BuildResult {
     chains,
     amountText: d.amountText.trim() || "—",
     amountUsd: d.amountUsd.trim() || "—",
+    unit: d.unit?.trim() || undefined,
     span: d.span.trim() || "—",
     updated: d.updated.trim() || new Date().toISOString().slice(0, 10),
     progress,

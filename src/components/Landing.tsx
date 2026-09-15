@@ -28,7 +28,7 @@ const FILE_META: Record<
   string,
   { stamp: string; fill?: boolean; drawdown: string; peakLabel?: string }
 > = {
-  "B-0913": { stamp: "MONITORING", drawdown: "2.37× GOAL IN 41.5 HOURS", peakLabel: "RAISED" },
+  "B-0913": { stamp: "MONITORING", drawdown: "3.0× GOAL IN 41.5 HOURS", peakLabel: "RAISED" },
   "R-0905": { stamp: "CLOSED", fill: true, drawdown: "−99.3% FROM PEAK" },
   "S-0830": { stamp: "ARCHIVED", drawdown: "−98.8% FROM PEAK" },
 };

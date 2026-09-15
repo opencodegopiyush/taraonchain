@@ -8,14 +8,14 @@ import ChapterReader from "./ChapterReader";
 import Inspector, { EntityPane } from "./Inspector";
 import { EPI_COLORS } from "@/lib/palette";
 
-/* ── case desk — v19 "NIGHT SHIFT" ───────────────────────────
-   the terminal keeps the 50/50 cut that v18 introduced — but
-   the seam is now YOURS. drag the grip to rebalance the halves
-   (36–64%), double-tap it to snap back to exactly 50 / 50, and
-   the live ratio is printed right on the grip. the plate eases
-   its camera as you read (the scrollspy lives in the report
-   pane); tapping a bubble swaps the report half to that
-   entity's full record while the plate keeps running. */
+/* ── case desk ───────────────────────────────────────────────
+   the 50/50 cut, drawn as a single hairline — no ratio printed,
+   the line is the whole interface. drag the seam to rebalance
+   the halves (36–64%), double-tap it to snap back to exactly
+   50 / 50; the hairline warms to signal while you hold it.
+   the plate eases its camera as you read (the scrollspy lives
+   in the report pane); tapping a bubble swaps the report half
+   to that entity's full record while the plate keeps running. */
 
 const MIN = 36;
 const MAX = 64;
@@ -113,7 +113,7 @@ export default function CaseDesk() {
           <Inspector />
         </div>
 
-        {/* ── the seam — grab it; the ratio is yours ── */}
+        {/* ── the seam — one line; drag it, the ratio is yours ── */}
         <div
           role="separator"
           aria-label="Drag to rebalance the split"
@@ -126,21 +126,14 @@ export default function CaseDesk() {
           onPointerCancel={onSeamUp}
           onDoubleClick={() => setSplit(50)}
           title="Drag to rebalance · double-tap for 50 / 50"
-          className={`relative z-20 flex h-8 w-full shrink-0 touch-none select-none items-center justify-center border-y border-[var(--line-strong)] transition-colors lg:h-auto lg:w-8 lg:flex-col lg:border-y-0 lg:border-l lg:border-r ${
-            grabbing ? "bg-[var(--paper-2)]" : "bg-[var(--paper)]"
-          } ${grabbing ? "cursor-grabbing" : "cursor-row-resize lg:cursor-col-resize"}`}
+          className={`relative z-20 h-3 w-full shrink-0 touch-none select-none lg:h-auto lg:w-3 ${
+            grabbing ? "cursor-grabbing" : "cursor-row-resize lg:cursor-col-resize"
+          }`}
         >
           <span
-            className="mono flex items-center gap-1.5 border px-2 py-1 text-[8.5px] tabular-nums tracking-[0.14em] lg:px-1.5 lg:py-2"
-            style={{
-              color: grabbing ? "var(--signal)" : "var(--ink-3)",
-              borderColor: grabbing ? "var(--signal)" : "var(--line-strong)",
-            }}
-          >
-            <span className="hidden lg:inline">·</span>
-            {Math.round(split)} / {100 - Math.round(split)}
-            <span className="hidden lg:inline">·</span>
-          </span>
+            className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 transition-colors duration-200 lg:left-1/2 lg:h-full lg:w-px lg:-translate-x-1/2 lg:translate-y-0"
+            style={{ background: grabbing ? "var(--signal)" : "var(--line-strong)" }}
+          />
         </div>
 
         {/* ── the report — the other half; scrolls inside itself ── */}
@@ -166,7 +159,7 @@ function Recenter() {
   );
 }
 
-/* the ruler — chapter numbers printed along the 50/50 seam */
+/* the ruler — chapter numbers along the plate's bottom edge */
 function Ruler() {
   const cf = useStore((s) => s.caseFile);
   const chapter = useStore((s) => s.chapter);
